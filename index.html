@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173f35">
+<title>My Expense Tracker</title>
+<style>
+:root{--bg:#f4f7f5;--card:#fff;--ink:#172b25;--muted:#718079;--green:#1e6650;--green2:#e2f1e9;--line:#e3ebe6;--red:#b63d3d;--amber:#9a6716;--shadow:0 8px 28px rgba(27,65,49,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:90px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:760px;margin:auto;padding:0 16px 24px}.hero{margin:0 -16px 18px;padding:calc(20px + env(safe-area-inset-top)) 22px 25px;background:linear-gradient(135deg,#163e34,#246b53);color:white;border-radius:0 0 28px 28px}.topline{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:700}.hero h1{font-size:27px;line-height:1.15;margin:13px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:#d6e9df;font-size:14px}.month-row{display:flex;align-items:center;gap:10px;margin-top:22px}.month-row label{font-size:12px;color:#d6e9df}.month-row input{border:1px solid #ffffff45;background:#ffffff15;color:white;border-radius:11px;padding:9px;min-width:0}.month-row input::-webkit-calendar-picker-indicator{filter:invert(1)}.summary{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:-2px}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.summary .panel{padding:17px}.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:750}.big-total{font-size:clamp(25px,6vw,34px);font-weight:800;letter-spacing:-.04em;margin:8px 0 5px;overflow-wrap:anywhere}.small-note{font-size:12px;color:var(--muted)}.mini-total{font-size:23px;font-weight:800;margin:10px 0 4px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 2px 12px}.section-head h2{font-size:18px;margin:0;letter-spacing:-.02em}.link-btn{background:transparent;border:0;color:var(--green);font-weight:750;padding:8px 2px}.primary{background:var(--green);color:white;border:0;border-radius:14px;padding:13px 16px;font-weight:750;box-shadow:0 5px 14px #1e665025}.secondary{background:var(--green2);color:var(--green);border:0;border-radius:12px;padding:10px 12px;font-weight:700}.ghost{background:#f4f7f5;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:650}.danger{background:#fff0f0;color:var(--red);border:0;border-radius:10px;padding:9px 11px;font-weight:700}.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cat-card{border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px;min-width:0}.cat-top{display:flex;align-items:center;gap:10px}.cat-icon{height:38px;width:38px;border-radius:13px;background:var(--green2);display:grid;place-items:center;font-size:19px;flex-shrink:0}.cat-name{font-weight:750;font-size:13px;line-height:1.25;overflow-wrap:anywhere}.cat-amount{font-size:17px;font-weight:800;margin-top:13px}.bar{height:5px;background:#edf2ef;border-radius:8px;margin-top:9px;overflow:hidden}.bar span{display:block;height:100%;background:#4c9a76;border-radius:8px}.list{display:flex;flex-direction:column;gap:9px}.expense{display:flex;align-items:center;gap:12px;padding:13px;background:white;border:1px solid var(--line);border-radius:16px}.expense .cat-icon{width:42px;height:42px}.exp-main{flex:1;min-width:0}.exp-title{font-size:14px;font-weight:750;overflow-wrap:anywhere}.exp-sub{font-size:12px;color:var(--muted);margin-top:4px}.exp-right{text-align:right;flex-shrink:0}.exp-amount{font-weight:800;font-size:15px}.actions{display:flex;gap:6px;margin-top:7px;justify-content:flex-end}.tiny{font-size:11px;border:0;background:#f2f6f3;color:var(--green);border-radius:8px;padding:6px 8px;font-weight:700}.empty{padding:28px 18px;text-align:center;background:white;border:1px dashed #cbd9d0;border-radius:18px;color:var(--muted)}.empty .emoji{font-size:32px;margin-bottom:9px}.empty strong{display:block;color:var(--ink);margin-bottom:5px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:#ffffffed;backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:10}.nav-inner{width:100%;max-width:650px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.nav-btn{border:0;background:transparent;color:#7a8981;border-radius:12px;padding:8px 3px;font-size:11px;font-weight:700;display:flex;align-items:center;flex-direction:column;gap:4px}.nav-btn span{font-size:19px}.nav-btn.active{background:var(--green2);color:var(--green)}.fab{position:fixed;right:max(20px,calc((100vw - 720px)/2));bottom:88px;border:0;border-radius:18px;width:58px;height:58px;background:var(--green);color:white;font-size:29px;box-shadow:0 10px 25px #1e66504a;z-index:5}.page{display:none}.page.active{display:block}.form-card{padding:18px}.field{margin-bottom:15px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:13px 12px;border:1px solid #dce6df;background:#fbfdfb;border-radius:12px;color:var(--ink);outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#4b9a76;box-shadow:0 0 0 3px #4b9a761c}.field textarea{min-height:75px;resize:vertical}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-actions{display:flex;gap:9px}.form-actions button{flex:1}.category-manage{display:flex;align-items:center;gap:10px;padding:12px;background:white;border:1px solid var(--line);border-radius:14px;margin-bottom:8px}.category-manage .cat-name{flex:1}.pill{display:inline-flex;align-items:center;border-radius:99px;background:#edf5ef;color:#28674e;padding:5px 9px;font-size:11px;font-weight:750}.notice{border-radius:12px;padding:11px 13px;font-size:13px;margin-bottom:12px;display:none}.notice.show{display:block}.notice.success{background:#e8f6ed;color:#236643}.notice.error{background:#fff0f0;color:#a33232}.notice.info{background:#edf4ff;color:#285b9b}.report-row{display:flex;align-items:center;gap:10px;margin:14px 0}.report-row .cat-name{width:115px}.report-track{flex:1;height:8px;background:#edf2ef;border-radius:8px;overflow:hidden}.report-track span{height:100%;display:block;background:#4c9a76;border-radius:8px}.report-value{font-size:12px;font-weight:750;min-width:75px;text-align:right}.backup-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.settings-note{font-size:13px;color:var(--muted);line-height:1.5}.modal-backdrop{display:none;position:fixed;inset:0;background:#10251dc0;z-index:30;align-items:flex-end;justify-content:center;padding:12px}.modal-backdrop.open{display:flex}.modal{width:100%;max-width:600px;background:var(--bg);border-radius:24px 24px 18px 18px;padding:20px;max-height:90vh;overflow:auto;box-shadow:0 20px 70px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modal-head h2{font-size:20px;margin:0}.close{border:0;background:#e7eee9;border-radius:10px;width:36px;height:36px;font-size:20px}.toast{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-140%);transition:transform .25s;z-index:50;background:#173f35;color:white;padding:12px 17px;border-radius:13px;box-shadow:var(--shadow);font-size:13px;font-weight:700;width:max-content;max-width:calc(100vw - 28px)}.toast.show{transform:translate(-50%,0)}.footnote{font-size:11px;color:var(--muted);line-height:1.5;margin-top:16px}.hidden{display:none!important}@media(min-width:600px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{border-radius:0 0 30px 30px}.app{padding-left:22px;padding-right:22px}.hero{margin-left:-22px;margin-right:-22px}.modal-backdrop{align-items:center}.modal{border-radius:24px}}
+</style>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Expenses">
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<header class="hero">
+ <div class="topline"><div class="brand">PERSONAL FINANCE</div><div class="pill" style="background:#ffffff20;color:white">₹ INR</div></div>
+ <h1>My Expense Tracker</h1><p>A clearer picture of where your money goes.</p>
+ <div class="month-row"><label for="monthFilter">MONTH</label><input id="monthFilter" type="month" aria-label="Select month"></div>
+</header>
+<main class="app">
+ <div id="notice" class="notice" role="status"></div>
+ <section id="dashboardPage" class="page active">
+  <div class="summary">
+   <div class="panel"><div class="eyebrow">Spent this month</div><div class="big-total" id="monthTotal">₹0</div><div class="small-note" id="monthCount">0 expenses recorded</div></div>
+   <div class="panel"><div class="eyebrow">Daily average</div><div class="mini-total" id="dailyAverage">₹0</div><div class="small-note">For selected month</div></div>
+  </div>
+  <div class="section-head"><h2>Where it goes</h2><button class="link-btn" onclick="showPage('reports')">Full report ↗</button></div>
+  <div id="categorySummary" class="category-grid"></div>
+  <div class="section-head"><h2>Recent expenses</h2><button class="link-btn" onclick="showPage('history')">See all</button></div>
+  <div id="recentList" class="list"></div>
+ </section>
+ <section id="historyPage" class="page">
+  <div class="section-head"><h2>Expense history</h2><button class="secondary" onclick="openExpense()">＋ Add</button></div>
+  <div class="field"><input id="searchExpenses" placeholder="Search notes or categories…" aria-label="Search expenses"></div>
+  <div class="form-row">
+   <div class="field"><label for="historyCategory">CATEGORY</label><select id="historyCategory"><option value="">All categories</option></select></div>
+   <div class="field"><label for="historySort">SORT BY</label><select id="historySort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="high">Highest amount</option><option value="low">Lowest amount</option></select></div>
+  </div>
+  <div id="historyList" class="list"></div>
+ </section>
+ <section id="reportsPage" class="page">
+  <div class="section-head"><h2>Monthly report</h2><span class="pill" id="reportMonth"></span></div>
+  <div class="panel" style="padding:18px"><div class="eyebrow">Total spending</div><div class="big-total" id="reportTotal">₹0</div><div class="small-note" id="reportCaption"></div><div id="reportBars"></div></div>
+  <div class="section-head"><h2>Spending by category</h2></div><div id="reportCategories" class="list"></div>
+ </section>
+ <section id="categoriesPage" class="page">
+  <div class="section-head"><h2>Manage categories</h2><button class="primary" onclick="openCategory()">＋ Add</button></div>
+  <p class="settings-note">Make categories that match your life. Rename or remove categories whenever you need. Expenses in a removed category are kept under “Uncategorized” rather than deleted.</p>
+  <div id="categoryManager"></div>
+ </section>
+ <section id="backupPage" class="page">
+  <div class="section-head"><h2>Backup & settings</h2></div>
+  <div class="card" style="padding:18px;margin-bottom:13px">
+   <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No account, no cloud sync, no subscription.</div></div></div>
+   <p class="settings-note">Export a backup regularly. Browser data can be lost if you clear website data or remove the browser app. A backup file lets you restore your records.</p>
+   <div class="backup-buttons"><button class="primary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Restore backup</button></div>
+   <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+   <div style="margin-top:10px"><button class="ghost" style="width:100%" onclick="exportCSV()">Export expenses as CSV</button></div>
+  </div>
+  <div class="card" style="padding:18px">
+   <strong>Data management</strong><p class="settings-note">This app stores expense records in your browser on this device. It does not connect to your bank or process payments.</p>
+   <button class="danger" onclick="clearAllData()">Delete all expense records</button>
+  </div>
+  <p class="footnote">Tip for iPhone: open this app in Safari and use Share → Add to Home Screen. If opened as a downloaded HTML file, browser storage support can vary; keep backups and preferably use a trusted HTTPS-hosted copy for reliable use.</p>
+ </section>
+</main>
+<button class="fab" id="fab" aria-label="Add expense" onclick="openExpense()">＋</button>
+<nav class="bottom-nav" aria-label="Main navigation"><div class="nav-inner">
+ <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')"><span>⌂</span>Home</button>
+ <button class="nav-btn" data-page="history" onclick="showPage('history')"><span>≡</span>Expenses</button>
+ <button class="nav-btn" data-page="reports" onclick="showPage('reports')"><span>▥</span>Reports</button>
+ <button class="nav-btn" data-page="categories" onclick="showPage('categories')"><span>◈</span>Categories</button>
+</div></nav>
+<div class="modal-backdrop" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+ <div class="modal"><div class="modal-head"><h2 id="expenseModalTitle">Add expense</h2><button class="close" onclick="closeModal('expenseModal')" aria-label="Close">×</button></div>
+ <form id="expenseForm">
+  <input id="expenseId" type="hidden">
+  <div class="field"><label for="amount">AMOUNT (₹) *</label><input id="amount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal" placeholder="e.g. 250" required></div>
+  <div class="form-row"><div class="field"><label for="expenseCategory">CATEGORY *</label><select id="expenseCategory" required></select></div><div class="field"><label for="expenseDate">DATE *</label><input id="expenseDate" type="date" required></div></div>
+  <div class="field"><label for="expenseNote">NOTE (OPTIONAL)</label><textarea id="expenseNote" maxlength="250" placeholder="What was this expense for?"></textarea></div>
+  <div class="form-actions"><button type="button" class="ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="primary" type="submit" id="saveExpenseBtn">Save expense</button></div>
+ </form>
+ </div>
+</div>
+<div class="modal-backdrop" id="categoryModal" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+ <div class="modal"><div class="modal-head"><h2 id="categoryModalTitle">Add category</h2><button class="close" onclick="closeModal('categoryModal')" aria-label="Close">×</button></div>
+ <form id="categoryForm"><input id="categoryId" type="hidden">
+  <div class="field"><label for="categoryName">CATEGORY NAME *</label><input id="categoryName" maxlength="35" required placeholder="e.g. Pet care"></div>
+  <div class="field"><label for="categoryEmoji">ICON / EMOJI</label><input id="categoryEmoji" maxlength="4" placeholder="e.g. 🐾"></div>
+  <div class="form-actions"><button type="button" class="ghost" onclick="closeModal('categoryModal')">Cancel</button><button class="primary" type="submit">Save category</button></div>
+ </form>
+ </div>
+</div>
+<script>
+(function(){
+'use strict';
+const STORAGE_KEY='myExpenseTracker_v1';
+const DEFAULT_CATEGORIES=[
+ {id:'food',name:'Food & Dining',emoji:'🍽️'},{id:'groceries',name:'Groceries',emoji:'🛒'},
+ {id:'transport',name:'Transport',emoji:'🚗'},{id:'shopping',name:'Shopping',emoji:'🛍️'},
+ {id:'bills',name:'Bills & Home',emoji:'🏠'},{id:'medical',name:'Medical',emoji:'💊'},
+ {id:'entertainment',name:'Entertainment',emoji:'🎬'},{id:'travel',name:'Travel',emoji:'🧳'},
+ {id:'personal',name:'Personal care',emoji:'✨'},{id:'misc',name:'Miscellaneous',emoji:'📦'}
+];
+let state={version:1,categories:DEFAULT_CATEGORIES.map(x=>({...x})),expenses:[]};
+let toastTimer;
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const currentMonth=()=>today().slice(0,7);
+const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(Number(n)||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
+function announce(msg,type='info'){const el=$('notice');el.textContent=msg;el.className='notice show '+type;setTimeout(()=>el.classList.remove('show'),5000)}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch(e){toast('Could not save. Export a backup and check device storage.');return false}}
+function load(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(parsed&&Array.isArray(parsed.categories)&&Array.isArray(parsed.expenses)){state={version:1,categories:parsed.categories,expenses:parsed.expenses};return}}}catch(e){announce('Saved data could not be read. Your browser storage may be damaged.','error')} }
+function selectedMonth(){return $('monthFilter').value||currentMonth()}
+function category(id){return state.categories.find(c=>c.id===id)||{id:'uncategorized',name:'Uncategorized',emoji:'📌'}}
+function allForMonth(){return state.expenses.filter(e=>String(e.date||'').slice(0,7)===selectedMonth())}
+function total(items){return items.reduce((sum,e)=>sum+Number(e.amount||0),0)}
+function dateLabel(s){if(!s)return 'No date';const d=new Date(s+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+function categoryTotals(items){const map={};items.forEach(e=>{const c=category(e.categoryId);map[c.id]=(map[c.id]||0)+Number(e.amount||0)});return Object.entries(map).map(([id,amount])=>({cat:category(id),amount})).sort((a,b)=>b.amount-a.amount)}
+function fillCategorySelects(){const opts=state.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.emoji||'📌')} ${esc(c.name)}</option>`).join('');$('expenseCategory').innerHTML=opts||'<option value="">Add a category first</option>';$('historyCategory').innerHTML='<option value="">All categories</option>'+opts}
+function expenseCard(e){const c=category(e.categoryId);return `<article class="expense"><div class="cat-icon">${esc(c.emoji||'📌')}</div><div class="exp-main"><div class="exp-title">${esc(c.name)}</div><div class="exp-sub">${esc(dateLabel(e.date))}${e.note?' · '+esc(e.note):''}</div></div><div class="exp-right"><div class="exp-amount">${money(e.amount)}</div><div class="actions"><button class="tiny" onclick="editExpense('${esc(e.id)}')">Edit</button><button class="tiny" onclick="deleteExpense('${esc(e.id)}')">Delete</button></div></div></article>`}
+function empty(msg,sub){return `<div class="empty"><div class="emoji">🧾</div><strong>${esc(msg)}</strong><span>${esc(sub)}</span></div>`}
+function renderDashboard(){const items=allForMonth();const sum=total(items);$('monthTotal').textContent=money(sum);$('monthCount').textContent=items.length+' expense'+(items.length===1?'':'s')+' recorded';const [y,m]=selectedMonth().split('-').map(Number);const days=new Date(y,m,0).getDate();$('dailyAverage').textContent=money(sum/days);const cats=categoryTotals(items);const max=cats[0]?.amount||1;$('categorySummary').innerHTML=cats.length?cats.slice(0,6).map(x=>`<div class="cat-card"><div class="cat-top"><div class="cat-icon">${esc(x.cat.emoji||'📌')}</div><div class="cat-name">${esc(x.cat.name)}</div></div><div class="cat-amount">${money(x.amount)}</div><div class="bar"><span style="width:${Math.max(3,x.amount/max*100)}%"></span></div></div>`).join(''):empty('No expenses yet','Tap + to record your first expense.');const recent=[...items].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0)).slice(0,5);$('recentList').innerHTML=recent.length?recent.map(expenseCard).join(''):empty('Nothing to show yet','Your latest expenses will appear here.')}
+function renderHistory(){const q=$('searchExpenses').value.trim().toLowerCase(),catId=$('historyCategory').value,sort=$('historySort').value;let items=allForMonth().filter(e=>(!catId||e.categoryId===catId)&&(!q||(category(e.categoryId).name+' '+(e.note||'')).toLowerCase().includes(q)));items.sort((a,b)=>sort==='oldest'?(a.date||'').localeCompare(b.date||''):sort==='high'?b.amount-a.amount:sort==='low'?a.amount-b.amount:(b.date||'').localeCompare(a.date||''));$('historyList').innerHTML=items.length?items.map(expenseCard).join(''):empty('No matching expenses','Try another search or add an expense.')}
+function renderReports(){const items=allForMonth(),cats=categoryTotals(items),sum=total(items);$('reportMonth').textContent=new Date(selectedMonth()+'-15T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});$('reportTotal').textContent=money(sum);$('reportCaption').textContent=items.length+' expenses · '+(sum? 'Largest category: '+(cats[0]?.cat.name||'—'):'No spending recorded this month');const max=cats[0]?.amount||1;$('reportBars').innerHTML=cats.map(x=>`<div class="report-row"><div class="cat-name">${esc(x.cat.emoji||'📌')} ${esc(x.cat.name)}</div><div class="report-track"><span style="width:${x.amount/max*100}%"></span></div><div class="report-value">${money(x.amount)}</div></div>`).join('')||'<p class="settings-note">Add expenses to see your category breakdown.</p>';$('reportCategories').innerHTML=cats.map(x=>`<div class="expense"><div class="cat-icon">${esc(x.cat.emoji||'📌')}</div><div class="exp-main"><div class="exp-title">${esc(x.cat.name)}</div><div class="exp-sub">${sum?Math.round(x.amount/sum*100):0}% of monthly spending</div></div><div class="exp-amount">${money(x.amount)}</div></div>`).join('')||empty('No report yet','Your spending summary will appear here.')}
+function renderCategories(){$('categoryManager').innerHTML=state.categories.map(c=>`<div class="category-manage"><div class="cat-icon">${esc(c.emoji||'📌')}</div><div class="cat-name">${esc(c.name)}</div><button class="tiny" onclick="editCategory('${esc(c.id)}')">Rename</button><button class="danger" onclick="deleteCategory('${esc(c.id)}')">Remove</button></div>`).join('')||empty('No categories','Add a category to start tracking.')}
+function render(){fillCategorySelects();renderDashboard();renderHistory();renderReports();renderCategories()}
+window.showPage=function(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(name+'Page').classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('fab').classList.toggle('hidden',name==='categories'||name==='backup');if(name==='backup')document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));window.scrollTo({top:0,behavior:'smooth'});render()};
+function openModal(id){$(id).classList.add('open');setTimeout(()=>{const input=$(id).querySelector('input:not([type=hidden]),select');if(input)input.focus({preventScroll:true})},100)}
+window.closeModal=id=>$(id).classList.remove('open');
+window.openExpense=function(id){$('expenseForm').reset();$('expenseId').value='';$('expenseModalTitle').textContent='Add expense';$('saveExpenseBtn').textContent='Save expense';$('expenseDate').value=today();fillCategorySelects();if(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;$('expenseId').value=e.id;$('amount').value=e.amount;$('expenseCategory').value=e.categoryId;$('expenseDate').value=e.date;$('expenseNote').value=e.note||'';$('expenseModalTitle').textContent='Edit expense';$('saveExpenseBtn').textContent='Update expense'}openModal('expenseModal')};
+window.editExpense=id=>openExpense(id);
+window.deleteExpense=function(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;state.expenses=state.expenses.filter(x=>x.id!==id);save();render();toast('Expense deleted')};
+$('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('amount').value),date=$('expenseDate').value,categoryId=$('expenseCategory').value,note=$('expenseNote').value.trim(),id=$('expenseId').value;if(!Number.isFinite(amount)||amount<=0){toast('Enter an amount greater than ₹0');$('amount').focus();return}if(amount>999999999){toast('Amount is too large');return}if(!date||date.length!==10){toast('Choose a valid date');return}if(!categoryId||!state.categories.some(c=>c.id===categoryId)){toast('Choose a valid category');return}if(note.length>250){toast('Note must be 250 characters or fewer');return}if(id){const index=state.expenses.findIndex(x=>x.id===id);if(index<0){toast('Expense not found');return}state.expenses[index]={...state.expenses[index],amount,date,categoryId,note,updatedAt:Date.now()}}else state.expenses.push({id:uid(),amount,date,categoryId,note,createdAt:Date.now()});const ok=save();closeModal('expenseModal');render();toast(id?'Expense updated':'Expense saved');if(!ok)announce('The change may not have been saved. Export or check browser storage.','error')});
+window.openCategory=function(id){$('categoryForm').reset();$('categoryId').value='';$('categoryModalTitle').textContent='Add category';if(id){const c=state.categories.find(x=>x.id===id);if(!c)return;$('categoryId').value=id;$('categoryName').value=c.name;$('categoryEmoji').value=c.emoji||'';$('categoryModalTitle').textContent='Rename category'}openModal('categoryModal')};
+window.editCategory=id=>openCategory(id);
+$('categoryForm').addEventListener('submit',e=>{e.preventDefault();const name=$('categoryName').value.trim(),emoji=$('categoryEmoji').value.trim()||'📌',id=$('categoryId').value;if(!name){toast('Enter a category name');return}if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.id!==id)){toast('That category already exists');return}if(id){const c=state.categories.find(x=>x.id===id);if(!c){toast('Category not found');return}c.name=name;c.emoji=emoji}else state.categories.push({id:uid(),name,emoji});save();closeModal('categoryModal');render();toast(id?'Category renamed':'Category added')});
+window.deleteCategory=function(id){const c=state.categories.find(x=>x.id===id);if(!c)return;const used=state.expenses.some(e=>e.categoryId===id);if(!confirm('Remove “'+c.name+'”? '+(used?'Existing expenses will remain and show as Uncategorized.':'This category will be removed.')))return;state.categories=state.categories.filter(x=>x.id!==id);if(used)state.expenses=state.expenses.map(e=>e.categoryId===id?{...e,categoryId:'uncategorized'}:e);save();render();toast('Category removed')};
+$('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
+function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+window.exportBackup=function(){const payload={app:'My Expense Tracker',version:1,exportedAt:new Date().toISOString(),categories:state.categories,expenses:state.expenses};download('expense-tracker-backup-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup export started')};
+window.exportCSV=function(){const rows=[['Date','Amount INR','Category','Note'],...state.expenses.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>[e.date,Number(e.amount).toFixed(2),category(e.categoryId).name,e.note||''])];const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('expenses-'+today()+'.csv','\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV export started')};
+$('importFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses))throw new Error('This file is not a valid expense tracker backup.');if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;const categories=parsed.categories.filter(c=>c&&typeof c.id==='string'&&typeof c.name==='string').map(c=>({id:c.id,name:c.name,emoji:String(c.emoji||'📌')}));const expenses=parsed.expenses.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&typeof x.date==='string').map(x=>({id:x.id,amount:Number(x.amount),date:x.date,categoryId:String(x.categoryId||'uncategorized'),note:String(x.note||'').slice(0,250),createdAt:Number(x.createdAt)||Date.now()}));if(!categories.length)throw new Error('Backup contains no valid categories.');state={version:1,categories,expenses};if(!save())throw new Error('Could not save restored data on this device.');render();toast('Backup restored successfully');announce('Your backup has been restored.','success')}catch(err){toast(err.message||'Could not restore this backup');announce(err.message||'Backup restore failed.','error')}finally{e.target.value=''}});
+window.clearAllData=function(){if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;state.expenses=[];save();render();toast('All expense records deleted')};
+document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
+load();render();
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
