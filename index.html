@@ -103,9 +103,21 @@
  </form>
  </div>
 </div>
+ 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 (function(){
 'use strict';
+ 
+const SUPABASE_URL = 'https://lxrzpmptadzbfwiovae.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_4hkB_6OBNc-GaJrwjbzvuQ__4F_fl2d';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
 const STORAGE_KEY='myExpenseTracker_v1';
 const DEFAULT_CATEGORIES=[
  {id:'food',name:'Food & Dining',emoji:'🍽️'},{id:'groceries',name:'Groceries',emoji:'🛒'},
