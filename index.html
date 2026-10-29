@@ -19,7 +19,13 @@
 <body>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <header class="hero">
- <div class="topline"><div class="brand">PERSONAL FINANCE</div><div class="pill" style="background:#ffffff20;color:white">₹ INR</div></div>
+ <div class="topline">
+ <div class="brand">PERSONAL FINANCE</div>
+ <div style="display:flex;align-items:center;gap:8px">
+  <button onclick="showPage('backup')" style="background:#ffffff20;color:white;border:1px solid #ffffff55;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700">Backup</button>
+  <div class="pill" style="background:#ffffff20;color:white">₹ INR</div>
+ </div>
+</div>
  <h1>My Expense Tracker</h1><p>A clearer picture of where your money goes.</p>
  <div class="month-row"><label for="monthFilter">MONTH</label><input id="monthFilter" type="month" aria-label="Select month"></div>
 </header>
