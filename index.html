@@ -63,6 +63,30 @@
  <section id="backupPage" class="page">
   <div class="section-head"><h2>Backup & settings</h2></div>
   <div class="card" style="padding:18px;margin-bottom:13px">
+  <div class="cat-top">
+    <div class="cat-icon">☁️</div>
+    <div>
+      <strong>Google Drive backup & sync</strong>
+      <div class="small-note" id="driveStatus" style="margin-top:4px">
+        Not connected · Data is saved on this device
+      </div>
+    </div>
+  </div>
+  <p class="settings-note">
+    Connect your Google account to keep a private backup in Google Drive.
+    When connected, changes can sync automatically whenever you're online.
+  </p>
+  <div class="backup-buttons">
+    <button class="primary" id="driveConnectBtn" type="button"
+      onclick="connectGoogleDrive()">Connect Google Drive</button>
+    <button class="secondary" id="driveSyncBtn" type="button"
+      onclick="syncGoogleDrive()" disabled>Sync now</button>
+  </div>
+  <div class="small-note" id="driveLastSync" style="margin-top:10px">
+    No Drive backup yet
+  </div>
+</div>
+  <div class="card" style="padding:18px;margin-bottom:13px">
    <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No account, no cloud sync, no subscription.</div></div></div>
    <p class="settings-note">Export a backup regularly. Browser data can be lost if you clear website data or remove the browser app. A backup file lets you restore your records.</p>
    <div class="backup-buttons"><button class="primary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Restore backup</button></div>
@@ -103,7 +127,8 @@
  </form>
  </div>
 </div>
- 
+
+ <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
@@ -156,6 +181,15 @@ async function logoutUser() {
 }
 
 const STORAGE_KEY='myExpenseTracker_v1';
+const GOOGLE_CLIENT_ID='923822466261-anrbm5j98p7iboej0a7h1j11hkpfqdn7.apps.googleusercontent.com';
+const GOOGLE_DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+let googleAccessToken=null;
+let googleTokenClient=null;
+let driveBackupFileId=null;
+let driveSyncTimer=null;
+let driveSyncInProgress=false;
+let driveSyncApplying=false;
+ 
 const DEFAULT_CATEGORIES=[
  {id:'food',name:'Food & Dining',emoji:'🍽️'},{id:'groceries',name:'Groceries',emoji:'🛒'},
  {id:'transport',name:'Transport',emoji:'🚗'},{id:'shopping',name:'Shopping',emoji:'🛍️'},
@@ -173,8 +207,257 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
 function announce(msg,type='info'){const el=$('notice');el.textContent=msg;el.className='notice show '+type;setTimeout(()=>el.classList.remove('show'),5000)}
-function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch(e){toast('Could not save. Export a backup and check device storage.');return false}}
-function load(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(parsed&&Array.isArray(parsed.categories)&&Array.isArray(parsed.expenses)){state={version:1,categories:parsed.categories,expenses:parsed.expenses};return}}}catch(e){announce('Saved data could not be read. Your browser storage may be damaged.','error')} }
+function setDriveStatus(message){
+  const el=document.getElementById('driveStatus');
+  if(el)el.textContent=message;
+}
+
+function setDriveLastSync(message){
+  const el=document.getElementById('driveLastSync');
+  if(el)el.textContent=message;
+}
+
+function connectGoogleDrive(){
+  if(!navigator.onLine){
+    setDriveStatus('You are offline. Connect to the internet first.');
+    return;
+  }
+  if(!window.google?.accounts?.oauth2){
+    setDriveStatus('Google connection is still loading. Please try again.');
+    return;
+  }
+  if(!googleTokenClient){
+    googleTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:GOOGLE_DRIVE_SCOPE,
+      callback:async response=>{
+        if(response.error||!response.access_token){
+          setDriveStatus('Google connection failed. Please try again.');
+          return;
+        }
+        googleAccessToken=response.access_token;
+        const btn=document.getElementById('driveSyncBtn');
+        if(btn)btn.disabled=false;
+        setDriveStatus('Google Drive connected. Syncing your data…');
+        await syncGoogleDrive();
+      }
+    });
+  }
+  setDriveStatus('Waiting for Google authorization…');
+  googleTokenClient.requestAccessToken({prompt:''});
+}
+
+async function driveRequest(url,options={}){
+  const response=await fetch(url,{
+    ...options,
+    headers:{
+      Authorization:'Bearer '+googleAccessToken,
+      ...(options.headers||{})
+    }
+  });
+  if(!response.ok){
+    const detail=await response.text();
+    throw new Error('Google Drive error '+response.status+': '+detail);
+  }
+  return response;
+}
+
+function mergeDriveData(local,remote){
+  const deletedExpenses=new Set([
+    ...(local.deletedExpenseIds||[]),
+    ...(remote.deletedExpenseIds||[])
+  ]);
+  const deletedCategories=new Set([
+    ...(local.deletedCategoryIds||[]),
+    ...(remote.deletedCategoryIds||[])
+  ]);
+
+  function mergeItems(a,b,deleted){
+    const map=new Map();
+    [...(a||[]),...(b||[])].forEach(item=>{
+      if(!item||!item.id||deleted.has(item.id))return;
+      const old=map.get(item.id);
+      const time=x=>Number(x.updatedAt||x.createdAt||0);
+      if(!old||time(item)>=time(old))map.set(item.id,item);
+    });
+    return [...map.values()];
+  }
+
+  return {
+    version:1,
+    categories:mergeItems(local.categories,remote.categories,deletedCategories),
+    expenses:mergeItems(local.expenses,remote.expenses,deletedExpenses),
+    deletedExpenseIds:[...deletedExpenses],
+    deletedCategoryIds:[...deletedCategories]
+  };
+}
+
+async function syncGoogleDrive(){
+  if(driveSyncInProgress)return;
+  if(!googleAccessToken){
+    setDriveStatus('Connect Google Drive before syncing.');
+    return;
+  }
+  if(!navigator.onLine){
+    setDriveStatus('Offline. Your changes remain saved on this device.');
+    return;
+  }
+
+  driveSyncInProgress=true;
+  const syncBtn=document.getElementById('driveSyncBtn');
+  if(syncBtn)syncBtn.disabled=true;
+
+  try{
+    setDriveStatus('Checking your Google Drive backup…');
+
+    const fileName='My Expense Tracker backup.json';
+    const query=encodeURIComponent(
+      "name='"+fileName+"' and trashed=false"
+    );
+    const listResponse=await driveRequest(
+      'https://www.googleapis.com/drive/v3/files?q='+query+
+      '&spaces=drive&fields=files(id,name,modifiedTime)'
+    );
+    const listData=await listResponse.json();
+    let file=(listData.files||[])[0]||null;
+
+    let remote={
+      version:1,categories:[],expenses:[],
+      deletedExpenseIds:[],deletedCategoryIds:[]
+    };
+
+    if(file){
+      driveBackupFileId=file.id;
+      const remoteResponse=await driveRequest(
+        'https://www.googleapis.com/drive/v3/files/'+
+        encodeURIComponent(file.id)+'?alt=media'
+      );
+      const data=await remoteResponse.json();
+
+      if(!data||!Array.isArray(data.categories)||
+         !Array.isArray(data.expenses)){
+        throw new Error('The Drive backup format is invalid. Your device data was not replaced.');
+      }
+      remote=data;
+    }
+
+    const local={
+      ...state,
+      deletedExpenseIds:state.deletedExpenseIds||[],
+      deletedCategoryIds:state.deletedCategoryIds||[]
+    };
+    const merged=mergeDriveData(local,remote);
+
+    state=merged;
+    if(!save())throw new Error('Could not save the merged data on this device.');
+
+    const backup={
+      app:'My Expense Tracker',
+      version:1,
+      exportedAt:new Date().toISOString(),
+      categories:state.categories,
+      expenses:state.expenses,
+      deletedExpenseIds:state.deletedExpenseIds,
+      deletedCategoryIds:state.deletedCategoryIds
+    };
+
+    const body=JSON.stringify(backup);
+
+    if(file){
+      await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files/'+
+        encodeURIComponent(file.id)+'?uploadType=media',
+        {method:'PATCH',headers:{'Content-Type':'application/json'},body}
+      );
+    }else{
+      const createResponse=await driveRequest(
+        'https://www.googleapis.com/drive/v3/files?fields=id',
+        {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            name:fileName,
+            mimeType:'application/json'
+          })
+        }
+      );
+      const created=await createResponse.json();
+      driveBackupFileId=created.id;
+
+      await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files/'+
+        encodeURIComponent(created.id)+'?uploadType=media',
+        {method:'PATCH',headers:{'Content-Type':'application/json'},body}
+      );
+    }
+
+    const now=new Date().toLocaleString();
+    setDriveStatus('Google Drive connected · Backup is up to date');
+    setDriveLastSync('Last successful sync: '+now);
+    if(typeof render==='function')render();
+
+  }catch(error){
+    console.error('Drive sync failed:',error);
+    if(String(error.message).includes('401')){
+      googleAccessToken=null;
+      setDriveStatus('Authorization expired. Tap Connect Google Drive again.');
+    }else{
+      setDriveStatus('Sync failed. Your device data is still saved.');
+      setDriveLastSync(error.message);
+    }
+  }finally{
+    driveSyncInProgress=false;
+    if(syncBtn)syncBtn.disabled=!googleAccessToken;
+  }
+}
+function save(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+
+    if(googleAccessToken&&navigator.onLine&&!driveSyncInProgress){
+      clearTimeout(driveSyncTimer);
+      driveSyncTimer=setTimeout(()=>{
+        syncGoogleDrive();
+      },2000);
+    }
+
+    return true;
+  }catch(e){
+    toast('Could not save. Export a backup and check device storage.');
+    return false;
+  }
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+
+    if(raw){
+      const parsed=JSON.parse(raw);
+
+      if(
+        parsed&&
+        Array.isArray(parsed.categories)&&
+        Array.isArray(parsed.expenses)
+      ){
+        state={
+          version:1,
+          categories:parsed.categories,
+          expenses:parsed.expenses,
+          deletedExpenseIds:Array.isArray(parsed.deletedExpenseIds)
+            ?parsed.deletedExpenseIds:[],
+          deletedCategoryIds:Array.isArray(parsed.deletedCategoryIds)
+            ?parsed.deletedCategoryIds:[]
+        };
+        return;
+      }
+    }
+  }catch(e){
+    announce(
+      'Saved data could not be read. Your browser storage may be damaged.',
+      'error'
+    );
+  }
+}
 function selectedMonth(){return $('monthFilter').value||currentMonth()}
 function category(id){return state.categories.find(c=>c.id===id)||{id:'uncategorized',name:'Uncategorized',emoji:'📌'}}
 function allForMonth(){return state.expenses.filter(e=>String(e.date||'').slice(0,7)===selectedMonth())}
@@ -194,12 +477,50 @@ function openModal(id){$(id).classList.add('open');setTimeout(()=>{const input=$
 window.closeModal=id=>$(id).classList.remove('open');
 window.openExpense=function(id){$('expenseForm').reset();$('expenseId').value='';$('expenseModalTitle').textContent='Add expense';$('saveExpenseBtn').textContent='Save expense';$('expenseDate').value=today();fillCategorySelects();if(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;$('expenseId').value=e.id;$('amount').value=e.amount;$('expenseCategory').value=e.categoryId;$('expenseDate').value=e.date;$('expenseNote').value=e.note||'';$('expenseModalTitle').textContent='Edit expense';$('saveExpenseBtn').textContent='Update expense'}openModal('expenseModal')};
 window.editExpense=id=>openExpense(id);
-window.deleteExpense=function(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;state.expenses=state.expenses.filter(x=>x.id!==id);save();render();toast('Expense deleted')};
+window.deleteExpense=function(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;state.deletedExpenseIds=state.deletedExpenseIds||[];
+if(!state.deletedExpenseIds.includes(id)){
+  state.deletedExpenseIds.push(id);
+}
+state.expenses=state.expenses.filter(x=>x.id!==id);
+save();
+render();
+toast('Expense deleted');};
 $('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('amount').value),date=$('expenseDate').value,categoryId=$('expenseCategory').value,note=$('expenseNote').value.trim(),id=$('expenseId').value;if(!Number.isFinite(amount)||amount<=0){toast('Enter an amount greater than ₹0');$('amount').focus();return}if(amount>999999999){toast('Amount is too large');return}if(!date||date.length!==10){toast('Choose a valid date');return}if(!categoryId||!state.categories.some(c=>c.id===categoryId)){toast('Choose a valid category');return}if(note.length>250){toast('Note must be 250 characters or fewer');return}if(id){const index=state.expenses.findIndex(x=>x.id===id);if(index<0){toast('Expense not found');return}state.expenses[index]={...state.expenses[index],amount,date,categoryId,note,updatedAt:Date.now()}}else state.expenses.push({id:uid(),amount,date,categoryId,note,createdAt:Date.now()});const ok=save();closeModal('expenseModal');render();toast(id?'Expense updated':'Expense saved');if(!ok)announce('The change may not have been saved. Export or check browser storage.','error')});
 window.openCategory=function(id){$('categoryForm').reset();$('categoryId').value='';$('categoryModalTitle').textContent='Add category';if(id){const c=state.categories.find(x=>x.id===id);if(!c)return;$('categoryId').value=id;$('categoryName').value=c.name;$('categoryEmoji').value=c.emoji||'';$('categoryModalTitle').textContent='Rename category'}openModal('categoryModal')};
 window.editCategory=id=>openCategory(id);
 $('categoryForm').addEventListener('submit',e=>{e.preventDefault();const name=$('categoryName').value.trim(),emoji=$('categoryEmoji').value.trim()||'📌',id=$('categoryId').value;if(!name){toast('Enter a category name');return}if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.id!==id)){toast('That category already exists');return}if(id){const c=state.categories.find(x=>x.id===id);if(!c){toast('Category not found');return}c.name=name;c.emoji=emoji}else state.categories.push({id:uid(),name,emoji});save();closeModal('categoryModal');render();toast(id?'Category renamed':'Category added')});
-window.deleteCategory=function(id){const c=state.categories.find(x=>x.id===id);if(!c)return;const used=state.expenses.some(e=>e.categoryId===id);if(!confirm('Remove “'+c.name+'”? '+(used?'Existing expenses will remain and show as Uncategorized.':'This category will be removed.')))return;state.categories=state.categories.filter(x=>x.id!==id);if(used)state.expenses=state.expenses.map(e=>e.categoryId===id?{...e,categoryId:'uncategorized'}:e);save();render();toast('Category removed')};
+window.deleteCategory=function(id){
+  const c=state.categories.find(x=>x.id===id);
+  if(!c)return;
+
+  const used=state.expenses.some(e=>e.categoryId===id);
+
+  if(!confirm('Remove “'+c.name+'”? '+(
+    used
+      ?'Existing expenses will remain and show as Uncategorized.'
+      :'This category will be removed.'
+  )))return;
+
+  state.deletedCategoryIds=state.deletedCategoryIds||[];
+
+  if(!state.deletedCategoryIds.includes(id)){
+    state.deletedCategoryIds.push(id);
+  }
+
+  state.categories=state.categories.filter(x=>x.id!==id);
+
+  if(used){
+    state.expenses=state.expenses.map(e=>
+      e.categoryId===id
+        ?{...e,categoryId:'uncategorized',updatedAt:Date.now()}
+        :e
+    );
+  }
+
+  save();
+  render();
+  toast('Category removed');
+};
 $('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 window.exportBackup=function(){const payload={app:'My Expense Tracker',version:1,exportedAt:new Date().toISOString(),categories:state.categories,expenses:state.expenses};download('expense-tracker-backup-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup export started')};
@@ -209,6 +530,26 @@ window.clearAllData=function(){if(!confirm('Delete ALL expense records? Categori
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
 load();render();
+ // Resume Drive sync when the app comes back online
+window.addEventListener('online',()=>{
+  if(googleAccessToken){
+    setDriveStatus('Internet restored. Syncing…');
+    syncGoogleDrive();
+  }else{
+    setDriveStatus('Internet restored. Connect Google Drive to sync.');
+  }
+});
+
+// Sync when the app returns to the foreground
+document.addEventListener('visibilitychange',()=>{
+  if(
+    document.visibilityState==='visible'&&
+    navigator.onLine&&
+    googleAccessToken
+  ){
+    syncGoogleDrive();
+  }
+});
  // Quick-entry deep link
 if (new URLSearchParams(window.location.search).get('quick') === '1') {
   setTimeout(() => window.openExpense(), 250);
