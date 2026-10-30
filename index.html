@@ -760,37 +760,98 @@ function save(){
     return false;
   }
 }
+
 function load(){
+  const RECOVERY_KEY = STORAGE_KEY + '_recovery';
+
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
 
-    if(raw){
-      const parsed=JSON.parse(raw);
+    if(!raw) return;
 
-      if(
-        parsed&&
-        Array.isArray(parsed.categories)&&
-        Array.isArray(parsed.expenses)
-      ){
-        state={
-          version:1,
-          categories:parsed.categories,
-          expenses:parsed.expenses,
-          deletedExpenseIds:Array.isArray(parsed.deletedExpenseIds)
-            ?parsed.deletedExpenseIds:[],
-          deletedCategoryIds:Array.isArray(parsed.deletedCategoryIds)
-            ?parsed.deletedCategoryIds:[]
-        };
-        return;
-      }
+    const parsed = JSON.parse(raw);
+
+    if(
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !Array.isArray(parsed.categories) ||
+      !Array.isArray(parsed.expenses)
+    ){
+      announce(
+        'Saved data has an unexpected format. The original data has been left untouched.',
+        'error'
+      );
+      return;
     }
-  }catch(e){
+
+    const validCategories = parsed.categories.filter(c =>
+      c &&
+      typeof c.id === 'string' &&
+      c.id.trim() &&
+      typeof c.name === 'string' &&
+      c.name.trim()
+    );
+
+    const validExpenses = parsed.expenses.filter(x => {
+      if(
+        !x ||
+        typeof x.id !== 'string' ||
+        !x.id.trim() ||
+        !Number.isFinite(Number(x.amount)) ||
+        Number(x.amount) <= 0 ||
+        typeof x.date !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(x.date)
+      ){
+        return false;
+      }
+
+      const date = new Date(x.date + 'T12:00:00');
+
+      return !isNaN(date.getTime()) &&
+        date.toISOString().slice(0,10) === x.date;
+    });
+
+    const hasInvalidRecords =
+      validCategories.length !== parsed.categories.length ||
+      validExpenses.length !== parsed.expenses.length;
+
+    if(hasInvalidRecords){
+      try{
+        if(!localStorage.getItem(RECOVERY_KEY)){
+          localStorage.setItem(RECOVERY_KEY, raw);
+        }
+      }catch(recoveryError){
+        console.error('Recovery copy could not be created:', recoveryError);
+      }
+
+      announce(
+        'Some saved records need checking. A recovery copy was attempted before loading valid records.',
+        'warning'
+      );
+    }
+
+    state = {
+      version: 1,
+      categories: validCategories,
+      expenses: validExpenses,
+      deletedExpenseIds: Array.isArray(parsed.deletedExpenseIds)
+        ? parsed.deletedExpenseIds.filter(id => typeof id === 'string')
+        : [],
+      deletedCategoryIds: Array.isArray(parsed.deletedCategoryIds)
+        ? parsed.deletedCategoryIds.filter(id => typeof id === 'string')
+        : []
+    };
+
+  }catch(error){
+    console.error('Saved data loading failed:', error);
+
     announce(
-      'Saved data could not be read. Your browser storage may be damaged.',
+      'Saved data could not be read. Do not clear browser data. Your original saved data has not been intentionally deleted.',
       'error'
     );
   }
 }
+
 function selectedMonth(){return $('monthFilter').value||currentMonth()}
 function category(id){return state.categories.find(c=>c.id===id)||{id:'uncategorized',name:'Uncategorized',emoji:'📌'}}
 function allForMonth(){return state.expenses.filter(e=>String(e.date||'').slice(0,7)===selectedMonth())}
