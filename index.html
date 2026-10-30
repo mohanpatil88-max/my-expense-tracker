@@ -760,7 +760,50 @@ function save(){
     return false;
   }
 }
+function commitState(changeFunction, successMessage){
+  let previousState;
 
+  try{
+    previousState = JSON.stringify(state);
+
+    changeFunction();
+
+    if(!save()){
+      state = JSON.parse(previousState);
+      render();
+
+      announce(
+        'Could not save this change. Your previous saved data has been restored. Check device storage and try again.',
+        'error'
+      );
+
+      return false;
+    }
+
+    render();
+    toast(successMessage);
+    return true;
+
+  }catch(error){
+    console.error('State update failed:', error);
+
+    if(previousState){
+      try{
+        state = JSON.parse(previousState);
+        render();
+      }catch(restoreError){
+        console.error('State rollback failed:', restoreError);
+      }
+    }
+
+    announce(
+      'The change could not be completed. Your previous data has been restored where possible.',
+      'error'
+    );
+
+    return false;
+  }
+}
 function load(){
   const RECOVERY_KEY = STORAGE_KEY + '_recovery';
 
