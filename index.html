@@ -389,7 +389,16 @@ textarea:focus-visible {
     animation-duration: .01ms !important;
   }
 }
+/* Five-item mobile bottom navigation */
+.nav-inner {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 
+.nav-btn {
+  font-size: 10px;
+  padding-left: 1px;
+  padding-right: 1px;
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -483,12 +492,25 @@ textarea:focus-visible {
  </section>
 </main>
 <button class="fab" id="fab" aria-label="Add expense" onclick="openExpense()">＋</button>
-<nav class="bottom-nav" aria-label="Main navigation"><div class="nav-inner">
- <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')"><span>⌂</span>Home</button>
- <button class="nav-btn" data-page="history" onclick="showPage('history')"><span>≡</span>Expenses</button>
- <button class="nav-btn" data-page="reports" onclick="showPage('reports')"><span>▥</span>Reports</button>
- <button class="nav-btn" data-page="categories" onclick="showPage('categories')"><span>◈</span>Categories</button>
-</div></nav>
+<nav class="bottom-nav" aria-label="Main navigation">
+ <div class="nav-inner">
+  <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">
+   <span>⌂</span>Home
+  </button>
+  <button class="nav-btn" data-page="history" onclick="showPage('history')">
+   <span>≡</span>Expenses
+  </button>
+  <button class="nav-btn" data-page="reports" onclick="showPage('reports')">
+   <span>▥</span>Reports
+  </button>
+  <button class="nav-btn" data-page="categories" onclick="showPage('categories')">
+   <span>◈</span>Categories
+  </button>
+  <button class="nav-btn" data-page="backup" onclick="showPage('backup')">
+   <span>⚙</span>Settings
+  </button>
+ </div>
+</nav>
 <div class="modal-backdrop" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
  <div class="modal"><div class="modal-head"><h2 id="expenseModalTitle">Add expense</h2><button class="close" onclick="closeModal('expenseModal')" aria-label="Close">×</button></div>
  <form id="expenseForm">
@@ -1078,7 +1100,32 @@ function renderHistory(){const q=$('searchExpenses').value.trim().toLowerCase(),
 function renderReports(){const items=allForMonth(),cats=categoryTotals(items),sum=total(items);$('reportMonth').textContent=new Date(selectedMonth()+'-15T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});$('reportTotal').textContent=money(sum);$('reportCaption').textContent=items.length+' expenses · '+(sum? 'Largest category: '+(cats[0]?.cat.name||'—'):'No spending recorded this month');const max=cats[0]?.amount||1;$('reportBars').innerHTML=cats.map(x=>`<div class="report-row"><div class="cat-name">${esc(x.cat.emoji||'📌')} ${esc(x.cat.name)}</div><div class="report-track"><span style="width:${x.amount/max*100}%"></span></div><div class="report-value">${money(x.amount)}</div></div>`).join('')||'<p class="settings-note">Add expenses to see your category breakdown.</p>';$('reportCategories').innerHTML=cats.map(x=>`<div class="expense"><div class="cat-icon">${esc(x.cat.emoji||'📌')}</div><div class="exp-main"><div class="exp-title">${esc(x.cat.name)}</div><div class="exp-sub">${sum?Math.round(x.amount/sum*100):0}% of monthly spending</div></div><div class="exp-amount">${money(x.amount)}</div></div>`).join('')||empty('No report yet','Your spending summary will appear here.')}
 function renderCategories(){$('categoryManager').innerHTML=state.categories.map(c=>`<div class="category-manage"><div class="cat-icon">${esc(c.emoji||'📌')}</div><div class="cat-name">${esc(c.name)}</div><button class="tiny" onclick="editCategory('${esc(c.id)}')">Rename</button><button class="danger" onclick="deleteCategory('${esc(c.id)}')">Remove</button></div>`).join('')||empty('No categories','Add a category to start tracking.')}
 function render(){fillCategorySelects();renderDashboard();renderHistory();renderReports();renderCategories()}
-window.showPage=function(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(name+'Page').classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('fab').classList.toggle('hidden',name==='categories'||name==='backup');if(name==='backup')document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));window.scrollTo({top:0,behavior:'smooth'});render()};
+window.showPage=function(name){
+  const page=document.getElementById(name+'Page');
+
+  if(!page){
+    announce('This page is not available. Please try again.','error');
+    return;
+  }
+
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
+  page.classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(button=>{
+    button.classList.toggle('active',button.dataset.page===name);
+  });
+
+  $('fab').classList.toggle(
+    'hidden',
+    name==='categories'||name==='backup'
+  );
+
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+};
 function openModal(id){$(id).classList.add('open');setTimeout(()=>{const input=$(id).querySelector('input:not([type=hidden]),select');if(input)input.focus({preventScroll:true})},100)}
 window.closeModal=id=>$(id).classList.remove('open');
 window.openExpense=function(id){$('expenseForm').reset();$('expenseId').value='';$('expenseModalTitle').textContent='Add expense';$('saveExpenseBtn').textContent='Save expense';$('expenseDate').value=today();fillCategorySelects();if(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;$('expenseId').value=e.id;$('amount').value=e.amount;$('expenseCategory').value=e.categoryId;$('expenseDate').value=e.date;$('expenseNote').value=e.note||'';$('expenseModalTitle').textContent='Edit expense';$('saveExpenseBtn').textContent='Update expense'}openModal('expenseModal')};
