@@ -914,15 +914,76 @@ function openModal(id){$(id).classList.add('open');setTimeout(()=>{const input=$
 window.closeModal=id=>$(id).classList.remove('open');
 window.openExpense=function(id){$('expenseForm').reset();$('expenseId').value='';$('expenseModalTitle').textContent='Add expense';$('saveExpenseBtn').textContent='Save expense';$('expenseDate').value=today();fillCategorySelects();if(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;$('expenseId').value=e.id;$('amount').value=e.amount;$('expenseCategory').value=e.categoryId;$('expenseDate').value=e.date;$('expenseNote').value=e.note||'';$('expenseModalTitle').textContent='Edit expense';$('saveExpenseBtn').textContent='Update expense'}openModal('expenseModal')};
 window.editExpense=id=>openExpense(id);
-window.deleteExpense=function(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;state.deletedExpenseIds=state.deletedExpenseIds||[];
-if(!state.deletedExpenseIds.includes(id)){
-  state.deletedExpenseIds.push(id);
-}
-state.expenses=state.expenses.filter(x=>x.id!==id);
-save();
-render();
-toast('Expense deleted');};
-$('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('amount').value),date=$('expenseDate').value,categoryId=$('expenseCategory').value,note=$('expenseNote').value.trim(),id=$('expenseId').value;if(!Number.isFinite(amount)||amount<=0){toast('Enter an amount greater than ₹0');$('amount').focus();return}if(amount>999999999){toast('Amount is too large');return}if(!date||date.length!==10){toast('Choose a valid date');return}if(!categoryId||!state.categories.some(c=>c.id===categoryId)){toast('Choose a valid category');return}if(note.length>250){toast('Note must be 250 characters or fewer');return}if(id){const index=state.expenses.findIndex(x=>x.id===id);if(index<0){toast('Expense not found');return}state.expenses[index]={...state.expenses[index],amount,date,categoryId,note,updatedAt:Date.now()}}else state.expenses.push({id:uid(),amount,date,categoryId,note,createdAt:Date.now()});const ok=save();closeModal('expenseModal');render();toast(id?'Expense updated':'Expense saved');if(!ok)announce('The change may not have been saved. Export or check browser storage.','error')});
+window.deleteExpense=function(id){
+  const e=state.expenses.find(x=>x.id===id);
+  if(!e)return;
+
+  if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;
+
+  commitState(()=>{
+    state.deletedExpenseIds=state.deletedExpenseIds||[];
+    if(!state.deletedExpenseIds.includes(id)){
+      state.deletedExpenseIds.push(id);
+    }
+    state.expenses=state.expenses.filter(x=>x.id!==id);
+  },'Expense deleted');
+};
+$('expenseForm').addEventListener('submit',e=>{
+  e.preventDefault();
+
+  const amount=Number($('amount').value);
+  const date=$('expenseDate').value;
+  const categoryId=$('expenseCategory').value;
+  const note=$('expenseNote').value.trim();
+  const id=$('expenseId').value;
+
+  if(!Number.isFinite(amount)||amount<=0){
+    toast('Enter an amount greater than ₹0');
+    $('amount').focus();
+    return;
+  }
+
+  if(amount>999999999){
+    toast('Amount is too large');
+    return;
+  }
+
+  if(!date||! /^\d{4}-\d{2}-\d{2}$/.test(date)||
+     new Date(date+'T12:00:00').toISOString().slice(0,10)!==date){
+    toast('Choose a valid date');
+    return;
+  }
+
+  if(!categoryId||!state.categories.some(c=>c.id===categoryId)){
+    toast('Choose a valid category');
+    return;
+  }
+
+  if(note.length>250){
+    toast('Note must be 250 characters or fewer');
+    return;
+  }
+
+  const success=commitState(()=>{
+    if(id){
+      const index=state.expenses.findIndex(x=>x.id===id);
+      if(index<0)throw new Error('Expense not found');
+
+      state.expenses[index]={
+        ...state.expenses[index],
+        amount,date,categoryId,note,
+        updatedAt:Date.now()
+      };
+    }else{
+      state.expenses.push({
+        id:uid(),amount,date,categoryId,note,
+        createdAt:Date.now()
+      });
+    }
+  },id?'Expense updated':'Expense saved');
+
+  if(success)closeModal('expenseModal');
+});
 window.openCategory=function(id){$('categoryForm').reset();$('categoryId').value='';$('categoryModalTitle').textContent='Add category';if(id){const c=state.categories.find(x=>x.id===id);if(!c)return;$('categoryId').value=id;$('categoryName').value=c.name;$('categoryEmoji').value=c.emoji||'';$('categoryModalTitle').textContent='Rename category'}openModal('categoryModal')};
 window.editCategory=id=>openCategory(id);
 $('categoryForm').addEventListener('submit',e=>{
@@ -937,6 +998,11 @@ $('categoryForm').addEventListener('submit',e=>{
     return;
   }
 
+  if(name.length>35){
+    toast('Category name must be 35 characters or fewer');
+    return;
+  }
+
   if(state.categories.some(c=>
     c.name.toLowerCase()===name.toLowerCase()&&c.id!==id
   )){
@@ -944,29 +1010,26 @@ $('categoryForm').addEventListener('submit',e=>{
     return;
   }
 
-  if(id){
-    const c=state.categories.find(x=>x.id===id);
-    if(!c){
-      toast('Category not found');
-      return;
-    }
-    c.name=name;
-    c.emoji=emoji;
-    c.updatedAt=Date.now();
-  }else{
-    state.categories.push({
-      id:uid(),
-      name,
-      emoji,
-      createdAt:Date.now(),
-      updatedAt:Date.now()
-    });
-  }
+  const success=commitState(()=>{
+    if(id){
+      const c=state.categories.find(x=>x.id===id);
+      if(!c)throw new Error('Category not found');
 
-  save();
-  closeModal('categoryModal');
-  render();
-  toast(id?'Category renamed':'Category added');
+      c.name=name;
+      c.emoji=emoji;
+      c.updatedAt=Date.now();
+    }else{
+      state.categories.push({
+        id:uid(),
+        name,
+        emoji,
+        createdAt:Date.now(),
+        updatedAt:Date.now()
+      });
+    }
+  },id?'Category renamed':'Category added');
+
+  if(success)closeModal('categoryModal');
 });
 window.deleteCategory=function(id){
   const c=state.categories.find(x=>x.id===id);
@@ -974,31 +1037,29 @@ window.deleteCategory=function(id){
 
   const used=state.expenses.some(e=>e.categoryId===id);
 
-  if(!confirm('Remove “'+c.name+'”? '+(
+  if(!confirm('Remove "'+c.name+'"? '+(
     used
       ?'Existing expenses will remain and show as Uncategorized.'
       :'This category will be removed.'
   )))return;
 
-  state.deletedCategoryIds=state.deletedCategoryIds||[];
+  commitState(()=>{
+    state.deletedCategoryIds=state.deletedCategoryIds||[];
 
-  if(!state.deletedCategoryIds.includes(id)){
-    state.deletedCategoryIds.push(id);
-  }
+    if(!state.deletedCategoryIds.includes(id)){
+      state.deletedCategoryIds.push(id);
+    }
 
-  state.categories=state.categories.filter(x=>x.id!==id);
+    state.categories=state.categories.filter(x=>x.id!==id);
 
-  if(used){
-    state.expenses=state.expenses.map(e=>
-      e.categoryId===id
-        ?{...e,categoryId:'uncategorized',updatedAt:Date.now()}
-        :e
-    );
-  }
-
-  save();
-  render();
-  toast('Category removed');
+    if(used){
+      state.expenses=state.expenses.map(e=>
+        e.categoryId===id
+          ?{...e,categoryId:'uncategorized',updatedAt:Date.now()}
+          :e
+      );
+    }
+  },'Category removed');
 };
 $('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -1098,18 +1159,17 @@ $('importFile').addEventListener('change',async e=>{
 window.clearAllData=function(){
   if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;
 
-  state.deletedExpenseIds=state.deletedExpenseIds||[];
+  commitState(()=>{
+    state.deletedExpenseIds=state.deletedExpenseIds||[];
 
-  state.expenses.forEach(expense=>{
-    if(!state.deletedExpenseIds.includes(expense.id)){
-      state.deletedExpenseIds.push(expense.id);
-    }
-  });
+    state.expenses.forEach(expense=>{
+      if(!state.deletedExpenseIds.includes(expense.id)){
+        state.deletedExpenseIds.push(expense.id);
+      }
+    });
 
-  state.expenses=[];
-  save();
-  render();
-  toast('All expense records deleted');
+    state.expenses=[];
+  },'All expense records deleted');
 };
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
