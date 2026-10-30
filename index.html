@@ -531,6 +531,7 @@ const DEFAULT_CATEGORIES=[
  {id:'personal',name:'Personal care',emoji:'✨'},{id:'misc',name:'Miscellaneous',emoji:'📦'}
 ];
 let state={version:1,categories:DEFAULT_CATEGORIES.map(x=>({...x})),expenses:[]};
+let dataReadOnly=false;
 let toastTimer;
 const $=id=>document.getElementById(id);
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -763,9 +764,15 @@ async function syncGoogleDrive(){
   }
 }
 function save(){
+  if(dataReadOnly){
+    announce(
+      'Saving is disabled because the original saved data could not be safely recovered. Export or recover your data before making changes.',
+      'error'
+    );
+    return false;
+  }
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-
     if(googleAccessToken&&navigator.onLine&&!driveSyncInProgress){
       clearTimeout(driveSyncTimer);
       driveSyncTimer=setTimeout(()=>{
@@ -824,96 +831,122 @@ function commitState(changeFunction, successMessage){
   }
 }
 function load(){
-  const RECOVERY_KEY = STORAGE_KEY + '_recovery';
+  const RECOVERY_KEY=STORAGE_KEY+'_recovery';
 
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw=localStorage.getItem(STORAGE_KEY);
 
-    if(!raw) return;
+    if(!raw)return;
 
-    const parsed = JSON.parse(raw);
+    const parsed=JSON.parse(raw);
 
     if(
       !parsed ||
-      typeof parsed !== 'object' ||
+      typeof parsed!=='object' ||
       !Array.isArray(parsed.categories) ||
       !Array.isArray(parsed.expenses)
     ){
+      dataReadOnly=true;
+
       announce(
-        'Saved data has an unexpected format. The original data has been left untouched.',
+        'Saved data has an unexpected format. Editing is disabled to protect the original data.',
         'error'
       );
       return;
     }
 
-    const validCategories = parsed.categories.filter(c =>
+    const validCategories=parsed.categories.filter(c=>
       c &&
-      typeof c.id === 'string' &&
+      typeof c.id==='string' &&
       c.id.trim() &&
-      typeof c.name === 'string' &&
+      typeof c.name==='string' &&
       c.name.trim()
     );
 
-    const validExpenses = parsed.expenses.filter(x => {
+    const validExpenses=parsed.expenses.filter(x=>{
       if(
         !x ||
-        typeof x.id !== 'string' ||
+        typeof x.id!=='string' ||
         !x.id.trim() ||
         !Number.isFinite(Number(x.amount)) ||
-        Number(x.amount) <= 0 ||
-        typeof x.date !== 'string' ||
+        Number(x.amount)<=0 ||
+        typeof x.date!=='string' ||
         !/^\d{4}-\d{2}-\d{2}$/.test(x.date)
       ){
         return false;
       }
 
-      const date = new Date(x.date + 'T12:00:00');
+      const date=new Date(x.date+'T12:00:00');
 
       return !isNaN(date.getTime()) &&
-        date.toISOString().slice(0,10) === x.date;
+        date.toISOString().slice(0,10)===x.date;
     });
 
-    const hasInvalidRecords =
-      validCategories.length !== parsed.categories.length ||
-      validExpenses.length !== parsed.expenses.length;
+    const hasInvalidRecords=
+      validCategories.length!==parsed.categories.length ||
+      validExpenses.length!==parsed.expenses.length;
 
     if(hasInvalidRecords){
+      let recoverySaved=false;
+
       try{
-        if(!localStorage.getItem(RECOVERY_KEY)){
-          localStorage.setItem(RECOVERY_KEY, raw);
+        let recoveryKey=RECOVERY_KEY;
+
+        const existingRecovery=localStorage.getItem(recoveryKey);
+
+        if(existingRecovery && existingRecovery!==raw){
+          recoveryKey=RECOVERY_KEY+'_'+Date.now();
         }
+
+        if(localStorage.getItem(recoveryKey)!==raw){
+          localStorage.setItem(recoveryKey,raw);
+        }
+
+        recoverySaved=localStorage.getItem(recoveryKey)===raw;
+
       }catch(recoveryError){
-        console.error('Recovery copy could not be created:', recoveryError);
+        console.error('Recovery copy could not be created:',recoveryError);
+      }
+
+      if(!recoverySaved){
+        dataReadOnly=true;
+
+        announce(
+          'Some saved records are invalid and a recovery copy could not be verified. Editing is disabled to protect your original data.',
+          'error'
+        );
+        return;
       }
 
       announce(
-        'Some saved records need checking. A recovery copy was attempted before loading valid records.',
+        'Some saved records need checking. A recovery copy was successfully preserved before loading valid records.',
         'warning'
       );
     }
 
-    state = {
-      version: 1,
-      categories: validCategories,
-      expenses: validExpenses,
-      deletedExpenseIds: Array.isArray(parsed.deletedExpenseIds)
-        ? parsed.deletedExpenseIds.filter(id => typeof id === 'string')
+    state={
+      version:1,
+      categories:validCategories,
+      expenses:validExpenses,
+      deletedExpenseIds:Array.isArray(parsed.deletedExpenseIds)
+        ? parsed.deletedExpenseIds.filter(id=>typeof id==='string')
         : [],
-      deletedCategoryIds: Array.isArray(parsed.deletedCategoryIds)
-        ? parsed.deletedCategoryIds.filter(id => typeof id === 'string')
+      deletedCategoryIds:Array.isArray(parsed.deletedCategoryIds)
+        ? parsed.deletedCategoryIds.filter(id=>typeof id==='string')
         : []
     };
 
   }catch(error){
-    console.error('Saved data loading failed:', error);
+    console.error('Saved data loading failed:',error);
+
+    dataReadOnly=true;
 
     announce(
-      'Saved data could not be read. Do not clear browser data. Your original saved data has not been intentionally deleted.',
+      'Saved data could not be read. Editing is disabled to protect the original data. Do not clear browser data.',
       'error'
     );
   }
 }
-
 function selectedMonth(){return $('monthFilter').value||currentMonth()}
 function category(id){return state.categories.find(c=>c.id===id)||{id:'uncategorized',name:'Uncategorized',emoji:'📌'}}
 function allForMonth(){return state.expenses.filter(e=>String(e.date||'').slice(0,7)===selectedMonth())}
