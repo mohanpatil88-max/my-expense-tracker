@@ -609,7 +609,7 @@ const btn=document.getElementById('driveSyncBtn');
   setDriveStatus('Waiting for Google authorization…');
   googleTokenClient.requestAccessToken({prompt:''});
 }
-
+window.connectGoogleDrive = connectGoogleDrive;
 async function driveRequest(url,options={}){
   const response=await fetch(url,{
     ...options,
@@ -888,6 +888,7 @@ setDriveLastSync('Last successful sync: '+now);
     if(syncBtn)syncBtn.disabled=!googleAccessToken;
   }
 }
+      window.syncGoogleDrive = syncGoogleDrive;
 function save(){
   if(dataReadOnly){
     announce(
