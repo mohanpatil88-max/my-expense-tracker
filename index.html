@@ -63,7 +63,7 @@
  <section id="backupPage" class="page">
   <div class="section-head"><h2>Backup & settings</h2></div>
   <div class="card" style="padding:18px;margin-bottom:13px">
-   <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No account, no cloud sync, no subscription.</div></div></div>
+   <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No separate app login or subscription. Google Drive sync is available when connected.</div></div></div>
    <p class="settings-note">Export a backup regularly. Browser data can be lost if you clear website data or remove the browser app. A backup file lets you restore your records.</p>
    <div class="backup-buttons"><button class="primary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Restore backup</button></div>
    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
@@ -202,10 +202,115 @@ $('categoryForm').addEventListener('submit',e=>{e.preventDefault();const name=$(
 window.deleteCategory=function(id){const c=state.categories.find(x=>x.id===id);if(!c)return;const used=state.expenses.some(e=>e.categoryId===id);if(!confirm('Remove “'+c.name+'”? '+(used?'Existing expenses will remain and show as Uncategorized.':'This category will be removed.')))return;state.categories=state.categories.filter(x=>x.id!==id);if(used)state.expenses=state.expenses.map(e=>e.categoryId===id?{...e,categoryId:'uncategorized'}:e);save();render();toast('Category removed')};
 $('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-window.exportBackup=function(){const payload={app:'My Expense Tracker',version:1,exportedAt:new Date().toISOString(),categories:state.categories,expenses:state.expenses};download('expense-tracker-backup-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup export started')};
+window.exportBackup=function(){
+  const payload={
+    app:'My Expense Tracker',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    categories:state.categories,
+    expenses:state.expenses,
+    deletedExpenseIds:state.deletedExpenseIds||[],
+    deletedCategoryIds:state.deletedCategoryIds||[]
+  };
+
+  download(
+    'expense-tracker-backup-'+today()+'.json',
+    JSON.stringify(payload,null,2),
+    'application/json'
+  );
+
+  toast('Backup export started');
+};
 window.exportCSV=function(){const rows=[['Date','Amount INR','Category','Note'],...state.expenses.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>[e.date,Number(e.amount).toFixed(2),category(e.categoryId).name,e.note||''])];const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('expenses-'+today()+'.csv','\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV export started')};
-$('importFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses))throw new Error('This file is not a valid expense tracker backup.');if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;const categories=parsed.categories.filter(c=>c&&typeof c.id==='string'&&typeof c.name==='string').map(c=>({id:c.id,name:c.name,emoji:String(c.emoji||'📌')}));const expenses=parsed.expenses.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&typeof x.date==='string').map(x=>({id:x.id,amount:Number(x.amount),date:x.date,categoryId:String(x.categoryId||'uncategorized'),note:String(x.note||'').slice(0,250),createdAt:Number(x.createdAt)||Date.now()}));if(!categories.length)throw new Error('Backup contains no valid categories.');state={version:1,categories,expenses};if(!save())throw new Error('Could not save restored data on this device.');render();toast('Backup restored successfully');announce('Your backup has been restored.','success')}catch(err){toast(err.message||'Could not restore this backup');announce(err.message||'Backup restore failed.','error')}finally{e.target.value=''}});
-window.clearAllData=function(){if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;state.expenses=[];save();render();toast('All expense records deleted')};
+$('importFile').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+
+  try{
+    const parsed=JSON.parse(await file.text());
+
+    if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses)){
+      throw new Error('This file is not a valid expense tracker backup.');
+    }
+
+    if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;
+
+    const categories=parsed.categories
+      .filter(c=>c&&typeof c.id==='string'&&c.id.trim()&&typeof c.name==='string'&&c.name.trim())
+      .map(c=>({
+        id:c.id,
+        name:c.name.trim(),
+        emoji:String(c.emoji||'📌'),
+        createdAt:Number(c.createdAt)||Date.now(),
+        updatedAt:Number(c.updatedAt)||Number(c.createdAt)||Date.now()
+      }));
+
+    const expenses=parsed.expenses
+      .filter(x=>x&&typeof x.id==='string'&&x.id.trim()&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&typeof x.date==='string')
+      .map(x=>({
+        id:x.id,
+        amount:Number(x.amount),
+        date:x.date,
+        categoryId:String(x.categoryId||'uncategorized'),
+        note:String(x.note||'').slice(0,250),
+        createdAt:Number(x.createdAt)||Date.now(),
+        updatedAt:Number(x.updatedAt)||Number(x.createdAt)||Date.now()
+      }));
+
+    if(!categories.length)throw new Error('Backup contains no valid categories.');
+
+    const importedExpenseIds=new Set(expenses.map(x=>x.id));
+    const importedCategoryIds=new Set(categories.map(x=>x.id));
+
+    const deletedExpenseIds=[...new Set([
+      ...(Array.isArray(parsed.deletedExpenseIds)?parsed.deletedExpenseIds:[]),
+      ...(state.deletedExpenseIds||[]),
+      ...state.expenses.filter(x=>!importedExpenseIds.has(x.id)).map(x=>x.id)
+    ])].filter(id=>typeof id==='string'&&!importedExpenseIds.has(id));
+
+    const deletedCategoryIds=[...new Set([
+      ...(Array.isArray(parsed.deletedCategoryIds)?parsed.deletedCategoryIds:[]),
+      ...(state.deletedCategoryIds||[]),
+      ...state.categories.filter(x=>!importedCategoryIds.has(x.id)).map(x=>x.id)
+    ])].filter(id=>typeof id==='string'&&!importedCategoryIds.has(id));
+
+    state={
+      version:1,
+      categories,
+      expenses,
+      deletedExpenseIds,
+      deletedCategoryIds
+    };
+
+    if(!save())throw new Error('Could not save restored data on this device.');
+
+    render();
+    toast('Backup restored successfully');
+    announce('Your backup has been restored.','success');
+
+  }catch(err){
+    toast(err.message||'Could not restore this backup');
+    announce(err.message||'Backup restore failed.','error');
+  }finally{
+    e.target.value='';
+  }
+});
+window.clearAllData=function(){
+  if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;
+
+  state.deletedExpenseIds=state.deletedExpenseIds||[];
+
+  state.expenses.forEach(expense=>{
+    if(!state.deletedExpenseIds.includes(expense.id)){
+      state.deletedExpenseIds.push(expense.id);
+    }
+  });
+
+  state.expenses=[];
+  save();
+  render();
+  toast('All expense records deleted');
+};
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
 load();render();
