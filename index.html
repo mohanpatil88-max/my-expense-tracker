@@ -700,7 +700,9 @@ window.testCloudSyncCode=async function(){
     );
 
     announce('Private cloud connection verified successfully.','success');
+announce('Private cloud connection verified successfully.','success');
 
+await syncSupabase();
   }catch(error){
     console.error('Cloud verification failed:',error);
 
