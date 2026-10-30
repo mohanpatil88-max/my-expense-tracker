@@ -511,57 +511,8 @@ textarea:focus-visible {
 </div>
 
  <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-(function(){
-'use strict';
- 
-const SUPABASE_URL = 'https://lxrzpmptadzbfwiovae.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_4hkB_6OBNc-GaJrwjbzvuQ__4F_fl2d';
-
-async function registerUser(email, password) {
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email.trim(),
-    password: password
-  });
-
-  if (error) {
-    alert("Registration failed: " + error.message);
-    return false;
-  }
-
-  alert("Registration successful! Please check your email and confirm your account before signing in.");
-  return true;
-}
-
-async function loginUser(email, password) {
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email.trim(),
-    password: password
-  });
-
-  if (error) {
-    alert("Login failed: " + error.message);
-    return false;
-  }
-
-  alert("Login successful!");
-  return true;
-}
-
-async function logoutUser() {
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    alert("Logout failed: " + error.message);
-    return false;
-  }
-
-  alert("Logged out successfully.");
-  return true;
-}
-
 const STORAGE_KEY='myExpenseTracker_v1';
 const GOOGLE_CLIENT_ID='923822466261-anrbm5j98p7iboej0a7h1j11hkpfqdn7.apps.googleusercontent.com';
 const GOOGLE_DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
