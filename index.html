@@ -610,7 +610,10 @@ const btn=document.getElementById('driveSyncBtn');
     });
   }
   setDriveStatus('Waiting for Google authorization…');
-  googleTokenClient.requestAccessToken({prompt:''});
+   googleTokenClient.requestAccessToken({
+  prompt: 'select_account',
+  hint: 'mohanpatil88@gmail.com'
+});
 }
 window.connectGoogleDrive = connectGoogleDrive;
 async function driveRequest(url,options={}){
