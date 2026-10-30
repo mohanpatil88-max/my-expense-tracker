@@ -1574,6 +1574,9 @@ window.deleteCategory=function(id){
 $('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 window.exportBackup=function(){
+   if(document.visibilityState==='visible'){
+  scheduleCloudSync(500);
+}
   const payload={
     app:'My Expense Tracker',
     version:1,
