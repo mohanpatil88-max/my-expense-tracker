@@ -519,6 +519,7 @@ const DRIVE_LAST_SYNC_KEY=STORAGE_KEY+'_drive_last_sync';
 const GOOGLE_CLIENT_ID='923822466261-anrbm5j98p7iboej0a7h1j11hkpfqdn7.apps.googleusercontent.com';
 const GOOGLE_DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
 let googleAccessToken=null;
+let googleTokenExpiresAt=0;
 let googleTokenClient=null;
 let driveBackupFileId=null;
 let driveSyncTimer=null;
@@ -572,7 +573,10 @@ function connectGoogleDrive(){
           return;
         }
         googleAccessToken=response.access_token;
-        const btn=document.getElementById('driveSyncBtn');
+googleTokenExpiresAt=Date.now()+
+  (Number(response.expires_in)||3600)*1000;
+
+const btn=document.getElementById('driveSyncBtn');
         if(btn)btn.disabled=false;
         setDriveStatus('Google Drive connected. Syncing your data…');
         await syncGoogleDrive();
@@ -634,10 +638,26 @@ async function syncGoogleDrive(){
     setDriveStatus('Sync paused. Saved data needs recovery before syncing.');
     return;
   }
-  if(!googleAccessToken){
-    setDriveStatus('Connect Google Drive before syncing.');
-    return;
-  }
+ if(!googleAccessToken){
+  setDriveStatus('Connect Google Drive before syncing.');
+  return;
+}
+
+if(
+  !googleTokenExpiresAt||
+  Date.now()>=googleTokenExpiresAt-60000
+){
+  googleAccessToken=null;
+  googleTokenExpiresAt=0;
+
+  const btn=document.getElementById('driveSyncBtn');
+  if(btn)btn.disabled=true;
+
+  setDriveStatus(
+    'Google authorization expired. Tap Connect Google Drive again.'
+  );
+  return;
+}
   if(!navigator.onLine){
     setDriveStatus('Offline. Your changes remain saved on this device.');
     return;
