@@ -601,7 +601,52 @@ async function driveRequest(url,options={}){
   }
   return response;
 }
+async function createDriveBackupSnapshot(fileId){
+  const timestamp=new Date().toISOString().replace(/[:.]/g,'-');
 
+  const response=await driveRequest(
+    'https://www.googleapis.com/drive/v3/files/'+
+    encodeURIComponent(fileId)+'/copy?fields=id',
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:'My Expense Tracker snapshot '+timestamp+'.json'
+      })
+    }
+  );
+
+  const snapshot=await response.json();
+
+  if(!snapshot.id){
+    throw new Error('Could not create a safety snapshot. The existing backup was not overwritten.');
+  }
+
+  return snapshot.id;
+}
+
+async function pruneDriveBackupSnapshots(){
+  const query=encodeURIComponent(
+    "name contains 'My Expense Tracker snapshot' and trashed=false"
+  );
+
+  const response=await driveRequest(
+    'https://www.googleapis.com/drive/v3/files?q='+query+
+    '&spaces=drive&orderBy=modifiedTime%20desc'+
+    '&pageSize=100&fields=files(id,name,modifiedTime)'
+  );
+
+  const data=await response.json();
+  const snapshots=data.files||[];
+
+  for(const oldFile of snapshots.slice(10)){
+    await driveRequest(
+      'https://www.googleapis.com/drive/v3/files/'+
+      encodeURIComponent(oldFile.id),
+      {method:'DELETE'}
+    );
+  }
+}
 function mergeDriveData(local,remote){
   const deletedExpenses=new Set([
     ...(local.deletedExpenseIds||[]),
@@ -733,9 +778,15 @@ if(!save()){
       deletedCategoryIds:state.deletedCategoryIds
     };
 
-    const body=JSON.stringify(backup);
+    const body=JSON.stringify(      
+       
+     if(file){
+      setDriveStatus('Creating a safety snapshot of your previous backup…');
 
-      if(file){
+      await createDriveBackupSnapshot(file.id);
+
+      setDriveStatus('Updating your Google Drive backup…');
+
       await driveRequest(
         'https://www.googleapis.com/upload/drive/v3/files/'+
         encodeURIComponent(file.id)+'?uploadType=media',
@@ -780,6 +831,14 @@ if(!save()){
       }
 
       driveBackupFileId=created.id;
+    }
+         try{
+      await pruneDriveBackupSnapshots();
+    }catch(snapshotCleanupError){
+      console.warn(
+        'Old backup snapshot cleanup failed:',
+        snapshotCleanupError
+      );
     }
     const syncTime=new Date().toISOString();
 
