@@ -590,6 +590,11 @@ let googleTokenClient=null;
 let driveBackupFileId=null;
 let driveSyncTimer=null;
 let driveSyncInProgress=false;
+      
+let cloudSyncTimer=null;
+let cloudSyncInProgress=false;
+let cloudSyncQueued=false;
+
 let driveSyncApplying=false;
  
 const DEFAULT_CATEGORIES=[
@@ -840,6 +845,153 @@ function mergeDriveData(local,remote){
   };
 }
 
+function scheduleCloudSync(delay=1800){
+  if(!localStorage.getItem(CLOUD_CODE_KEY))return;
+
+  clearTimeout(cloudSyncTimer);
+
+  cloudSyncTimer=setTimeout(()=>{
+    syncSupabase();
+  },delay);
+}
+
+async function cloudRequest(functionName,payload){
+  const response=await fetch(
+    SUPABASE_URL+'/rest/v1/rpc/'+functionName,
+    {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_ANON_KEY,
+        'Authorization':'Bearer '+SUPABASE_ANON_KEY
+      },
+      body:JSON.stringify(payload)
+    }
+  );
+
+  if(!response.ok){
+    const message=await response.text();
+    throw new Error(
+      'Cloud request failed ('+response.status+'). '+message.slice(0,250)
+    );
+  }
+
+  return response.json();
+}
+
+async function syncSupabase(){
+  if(cloudSyncInProgress){
+    cloudSyncQueued=true;
+    return;
+  }
+
+  if(dataReadOnly){
+    setCloudStatus('Sync paused to protect your saved data.');
+    return;
+  }
+
+  const code=localStorage.getItem(CLOUD_CODE_KEY);
+
+  if(!code){
+    setCloudStatus('Enter and verify your private sync code first.');
+    return;
+  }
+
+  if(!navigator.onLine){
+    setCloudStatus('Offline. Your expenses remain saved on this device.');
+    return;
+  }
+
+  cloudSyncInProgress=true;
+  cloudSyncQueued=false;
+
+  setCloudStatus('Synchronizing your expenses…');
+
+  try{
+    // Read cloud data first. Never replace local data with an empty response.
+    const remoteResult=await cloudRequest(
+      'get_expense_tracker_data',
+      {p_code:code}
+    );
+
+    if(!remoteResult||remoteResult.ok!==true){
+      throw new Error('Private sync code is invalid. Verify it again.');
+    }
+
+    const remote=remoteResult.data;
+
+    if(
+      !remote ||
+      !Array.isArray(remote.categories) ||
+      !Array.isArray(remote.expenses)
+    ){
+      throw new Error('Cloud data format is invalid. Local data was not replaced.');
+    }
+
+    // Merge the latest in-memory local state with cloud records.
+    const merged=mergeDriveData(state,remote);
+
+    // Keep a rollback copy until local persistence succeeds.
+    const previousState=state;
+    state=merged;
+
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      localStorage.setItem(DRIVE_PENDING_KEY,'1');
+    }catch(storageError){
+      state=previousState;
+      throw new Error('Could not safely save merged data on this device.');
+    }
+
+    if(typeof render==='function'){
+      render();
+    }
+
+    // Upload the merged result.
+    await cloudRequest(
+      'save_expense_tracker_data',
+      {
+        p_code:code,
+        p_data:{
+          version:1,
+          categories:state.categories,
+          expenses:state.expenses,
+          deletedExpenseIds:state.deletedExpenseIds||[],
+          deletedCategoryIds:state.deletedCategoryIds||[]
+        }
+      }
+    );
+
+    const now=new Date();
+
+    setCloudStatus(
+      'Connected · Last synced '+now.toLocaleString()
+    );
+
+    localStorage.setItem(
+      STORAGE_KEY+'_cloud_last_sync',
+      now.toISOString()
+    );
+
+  }catch(error){
+    console.error('Supabase sync failed:',error);
+
+    setCloudStatus(
+      'Sync failed. Your device data is still saved. '+error.message
+    );
+
+  }finally{
+    cloudSyncInProgress=false;
+
+    if(cloudSyncQueued){
+      cloudSyncQueued=false;
+      scheduleCloudSync(500);
+    }
+  }
+}
+
+window.syncSupabase=syncSupabase;
+
 async function syncGoogleDrive(){
   if(driveSyncInProgress)return;
      if(dataReadOnly){
@@ -1030,6 +1182,7 @@ setDriveLastSync('Last successful sync: '+now);
 }
       window.syncGoogleDrive = syncGoogleDrive;
 function save(){
+   scheduleCloudSync();
   if(dataReadOnly){
     announce(
       'Saving is disabled because the original saved data could not be safely recovered. Export or recover your data before making changes.',
@@ -1549,6 +1702,9 @@ window.clearAllData=function(){
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
 load();render();
+      if(localStorage.getItem(CLOUD_CODE_KEY)){
+  scheduleCloudSync(500);
+}
 if(localStorage.getItem(DRIVE_PENDING_KEY)==='1'){
   setDriveStatus(
     'Backup pending · Connect Google Drive to protect your latest changes'
@@ -1564,6 +1720,7 @@ if(previousSync){
 }
  // Resume Drive sync when the app comes back online
 window.addEventListener('online',()=>{
+   scheduleCloudSync(500);
   if(googleAccessToken){
     setDriveStatus('Internet restored. Syncing…');
     syncGoogleDrive();
@@ -1574,6 +1731,9 @@ window.addEventListener('online',()=>{
 
 // Sync when the app returns to the foreground
 document.addEventListener('visibilitychange',()=>{
+   if(document.visibilityState==='visible'){
+  scheduleCloudSync(500);
+}
   if(
     document.visibilityState==='visible'&&
     navigator.onLine&&
