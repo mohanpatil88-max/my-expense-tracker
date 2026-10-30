@@ -700,7 +700,6 @@ window.testCloudSyncCode=async function(){
     );
 
     announce('Private cloud connection verified successfully.','success');
-announce('Private cloud connection verified successfully.','success');
 
 await syncSupabase();
   }catch(error){
@@ -1184,7 +1183,6 @@ setDriveLastSync('Last successful sync: '+now);
 }
       window.syncGoogleDrive = syncGoogleDrive;
 function save(){
-   scheduleCloudSync();
   if(dataReadOnly){
     announce(
       'Saving is disabled because the original saved data could not be safely recovered. Export or recover your data before making changes.',
@@ -1198,7 +1196,7 @@ function save(){
     localStorage.setItem(DRIVE_PENDING_KEY,'1');
 
     localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-
+scheduleCloudSync();
     if(googleAccessToken&&navigator.onLine&&!driveSyncInProgress){
       clearTimeout(driveSyncTimer);
 
