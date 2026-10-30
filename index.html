@@ -697,59 +697,52 @@ async function syncGoogleDrive(){
 
     const body=JSON.stringify(backup);
 
-    if(file){
+      if(file){
       await driveRequest(
         'https://www.googleapis.com/upload/drive/v3/files/'+
         encodeURIComponent(file.id)+'?uploadType=media',
-        {method:'PATCH',headers:{'Content-Type':'application/json'},body}
+        {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json'},
+          body
+        }
       );
     }else{
-  const boundary='expense_tracker_'+Date.now();
+      const boundary='expense_tracker_'+Date.now();
 
-  const metadata={
-    name:fileName,
-    mimeType:'application/json'
-  };
+      const metadata={
+        name:fileName,
+        mimeType:'application/json'
+      };
 
-  const multipartBody=
-    '--'+boundary+'\r\n'+
-    'Content-Type: application/json; charset=UTF-8\r\n\r\n'+
-    JSON.stringify(metadata)+'\r\n'+
-    '--'+boundary+'\r\n'+
-    'Content-Type: application/json\r\n\r\n'+
-    body+'\r\n'+
-    '--'+boundary+'--';
+      const multipartBody=
+        '--'+boundary+'\r\n'+
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n'+
+        JSON.stringify(metadata)+'\r\n'+
+        '--'+boundary+'\r\n'+
+        'Content-Type: application/json\r\n\r\n'+
+        body+'\r\n'+
+        '--'+boundary+'--';
 
-  const createResponse=await driveRequest(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-    {
-      method:'POST',
-      headers:{
-        'Content-Type':'multipart/related; boundary='+boundary
-      },
-      body:multipartBody
-    }
-  );
-
-  const created=await createResponse.json();
-
-  if(!created.id){
-    throw new Error('Google Drive did not return a backup file ID.');
-  }
-
-  driveBackupFileId=created.id;
-}
+      const createResponse=await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        {
+          method:'POST',
+          headers:{
+            'Content-Type':'multipart/related; boundary='+boundary
+          },
+          body:multipartBody
+        }
       );
+
       const created=await createResponse.json();
+
+      if(!created.id){
+        throw new Error('Google Drive did not return a backup file ID.');
+      }
+
       driveBackupFileId=created.id;
-
-      await driveRequest(
-        'https://www.googleapis.com/upload/drive/v3/files/'+
-        encodeURIComponent(created.id)+'?uploadType=media',
-        {method:'PATCH',headers:{'Content-Type':'application/json'},body}
-      );
     }
-
     const now=new Date().toLocaleString();
     setDriveStatus('Google Drive connected · Backup is up to date');
     setDriveLastSync('Last successful sync: '+now);
