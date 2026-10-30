@@ -454,7 +454,43 @@ textarea:focus-visible {
  <section id="backupPage" class="page">
   <div class="section-head"><h2>Backup & settings</h2></div>
   <div class="card" style="padding:18px;margin-bottom:13px">
+  
+<div class="card" style="padding:18px;margin-bottom:13px">
   <div class="cat-top">
+    <div class="cat-icon">🔄</div>
+    <div>
+      <strong>Automatic cloud sync</strong>
+      <div class="small-note" id="cloudStatus" style="margin-top:4px">
+        Private sync code not configured
+      </div>
+    </div>
+  </div>
+
+  <p class="settings-note">
+    Connect once with your private sync code. Your data stays saved
+    on this device and will be synchronized with your cloud database
+    when automatic sync is enabled.
+  </p>
+
+  <div class="field">
+    <label for="cloudSyncCode">PRIVATE SYNC CODE</label>
+    <input
+      id="cloudSyncCode"
+      type="password"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+      placeholder="Enter your private sync code"
+    >
+  </div>
+
+  <button class="primary" id="cloudConnectBtn"
+    type="button" onclick="testCloudSyncCode()" style="width:100%">
+    Verify private code
+  </button>
+</div>
+
+     <div class="cat-top">
     <div class="cat-icon">☁️</div>
     <div>
       <strong>Google Drive backup & sync</strong>
@@ -539,7 +575,11 @@ textarea:focus-visible {
 
 <script>
    (function(){
-const STORAGE_KEY='myExpenseTracker_v1';
+const STORAGE_KEY='myExpenseTracker_v1';  
+const SUPABASE_URL='https://lxrzpmptadzbffwiovae.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Imx4cnpwbXB0YWR6YmZmd2lvdmFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyODU0MzEsImV4cCI6MjEwODg2MTQzMX0.flWIwXYsci8nJf639eZBpe-gEsOkR98E6nwu15aoTV4';
+const CLOUD_CODE_KEY=STORAGE_KEY+'_cloud_code';
+
 const DRIVE_PENDING_KEY=STORAGE_KEY+'_drive_pending';
 const DRIVE_LAST_SYNC_KEY=STORAGE_KEY+'_drive_last_sync'; 
 const GOOGLE_CLIENT_ID='923822466261-anrbm5j98p7iboej0a7h1j11hkpfqdn7.apps.googleusercontent.com';
@@ -578,6 +618,100 @@ function setDriveStatus(message){
 function setDriveLastSync(message){
   const el=document.getElementById('driveLastSync');
   if(el)el.textContent=message;
+}
+
+function setCloudStatus(message){
+  const el=document.getElementById('cloudStatus');
+  if(el)el.textContent=message;
+}
+
+window.testCloudSyncCode=async function(){
+  const input=document.getElementById('cloudSyncCode');
+  const button=document.getElementById('cloudConnectBtn');
+
+  const code=(input?.value||'').trim();
+
+  if(code.length<32){
+    setCloudStatus('Please enter your complete private sync code.');
+    announce('Please enter your private sync code.','error');
+    return;
+  }
+
+  if(!navigator.onLine){
+    setCloudStatus('You are offline. Internet is required for verification.');
+    announce('Please connect to the internet first.','warning');
+    return;
+  }
+
+  if(button)button.disabled=true;
+  setCloudStatus('Verifying your private connection…');
+
+  try{
+    const response=await fetch(
+      SUPABASE_URL+'/rest/v1/rpc/get_expense_tracker_data',
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey':SUPABASE_ANON_KEY,
+          'Authorization':'Bearer '+SUPABASE_ANON_KEY
+        },
+        body:JSON.stringify({p_code:code})
+      }
+    );
+
+    let result;
+
+    try{
+      result=await response.json();
+    }catch(parseError){
+      throw new Error('The server returned an invalid response.');
+    }
+
+    if(!response.ok){
+      throw new Error(
+        'Server verification failed ('+response.status+'). Check database setup.'
+      );
+    }
+
+    if(!result || result.ok!==true){
+      throw new Error('Incorrect private sync code. Please check and retry.');
+    }
+
+    if(
+      !result.data ||
+      !Array.isArray(result.data.categories) ||
+      !Array.isArray(result.data.expenses)
+    ){
+      throw new Error('Cloud data format is invalid. No local data was changed.');
+    }
+
+    localStorage.setItem(CLOUD_CODE_KEY,code);
+
+    if(input)input.value='';
+
+    setCloudStatus(
+      'Private code verified. Ready for automatic sync setup.'
+    );
+
+    announce('Private cloud connection verified successfully.','success');
+
+  }catch(error){
+    console.error('Cloud verification failed:',error);
+
+    setCloudStatus(error.message||'Connection failed. Please try again.');
+
+    announce(error.message||'Cloud verification failed.','error');
+
+  }finally{
+    if(button)button.disabled=false;
+  }
+};
+
+const savedCloudCode=localStorage.getItem(CLOUD_CODE_KEY);
+
+if(savedCloudCode){
+  setCloudStatus('Previously verified on this device. Automatic sync setup pending.');
 }
 
 function connectGoogleDrive(){
