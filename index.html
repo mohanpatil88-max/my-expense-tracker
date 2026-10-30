@@ -649,7 +649,8 @@ async function syncGoogleDrive(){
     );
     const listResponse=await driveRequest(
       'https://www.googleapis.com/drive/v3/files?q='+query+
-      '&spaces=drive&fields=files(id,name,modifiedTime)'
+'&spaces=drive&orderBy=modifiedTime%20desc'+
+'&pageSize=100&fields=files(id,name,modifiedTime)'
     );
     const listData=await listResponse.json();
     let file=(listData.files||[])[0]||null;
@@ -703,16 +704,41 @@ async function syncGoogleDrive(){
         {method:'PATCH',headers:{'Content-Type':'application/json'},body}
       );
     }else{
-      const createResponse=await driveRequest(
-        'https://www.googleapis.com/drive/v3/files?fields=id',
-        {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            name:fileName,
-            mimeType:'application/json'
-          })
-        }
+  const boundary='expense_tracker_'+Date.now();
+
+  const metadata={
+    name:fileName,
+    mimeType:'application/json'
+  };
+
+  const multipartBody=
+    '--'+boundary+'\r\n'+
+    'Content-Type: application/json; charset=UTF-8\r\n\r\n'+
+    JSON.stringify(metadata)+'\r\n'+
+    '--'+boundary+'\r\n'+
+    'Content-Type: application/json\r\n\r\n'+
+    body+'\r\n'+
+    '--'+boundary+'--';
+
+  const createResponse=await driveRequest(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    {
+      method:'POST',
+      headers:{
+        'Content-Type':'multipart/related; boundary='+boundary
+      },
+      body:multipartBody
+    }
+  );
+
+  const created=await createResponse.json();
+
+  if(!created.id){
+    throw new Error('Google Drive did not return a backup file ID.');
+  }
+
+  driveBackupFileId=created.id;
+}
       );
       const created=await createResponse.json();
       driveBackupFileId=created.id;
