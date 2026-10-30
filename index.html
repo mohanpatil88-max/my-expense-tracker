@@ -778,11 +778,11 @@ if(!save()){
       deletedCategoryIds:state.deletedCategoryIds
     };
 
-    const body=JSON.stringify(      
-       
-     if(file){
-      setDriveStatus('Creating a safety snapshot of your previous backup…');
+    
+const body=JSON.stringify(backup);
 
+    if(file){
+      setDriveStatus('Creating a safety snapshot of your previous backup…');
       await createDriveBackupSnapshot(file.id);
 
       setDriveStatus('Updating your Google Drive backup…');
