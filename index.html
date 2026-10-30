@@ -468,10 +468,13 @@ textarea:focus-visible {
     When connected, changes can sync automatically whenever you're online.
   </p>
   <div class="backup-buttons">
-    <button class="primary" id="driveConnectBtn" type="button"
-      onclick="connectGoogleDrive()">Connect Google Drive</button>
-    <button class="secondary" id="driveSyncBtn" type="button"
-      onclick="syncGoogleDrive()" disabled>Sync now</button>
+<button class="primary" id="driveConnectBtn" type="button">
+  Connect Google Drive
+</button>
+
+<button class="secondary" id="driveSyncBtn" type="button" disabled>
+  Sync now
+</button>
   </div>
   <div class="small-note" id="driveLastSync" style="margin-top:10px">
     No Drive backup yet
@@ -1450,6 +1453,33 @@ if (new URLSearchParams(window.location.search).get('quick') === '1') {
 </script>
 
 <script>
+   // Reliable Google Drive button click handlers
+(function () {
+  const connectBtn = document.getElementById('driveConnectBtn');
+  const syncBtn = document.getElementById('driveSyncBtn');
+  const status = document.getElementById('driveStatus');
+
+  if (connectBtn) {
+    connectBtn.addEventListener('click', function () {
+      if (typeof window.connectGoogleDrive === 'function') {
+        if (status) status.textContent = 'Connect button tapped. Starting Google authorization…';
+        window.connectGoogleDrive();
+      } else {
+        if (status) status.textContent = 'App initialization error. Please reload the app.';
+      }
+    });
+  }
+
+  if (syncBtn) {
+    syncBtn.addEventListener('click', function () {
+      if (typeof window.syncGoogleDrive === 'function') {
+        window.syncGoogleDrive();
+      } else {
+        if (status) status.textContent = 'Sync function unavailable. Please reload the app.';
+      }
+    });
+  }
+})();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
