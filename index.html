@@ -701,17 +701,28 @@ if(
       }
       remote=data;
     }
+const local={
+  ...state,
+  deletedExpenseIds:state.deletedExpenseIds||[],
+  deletedCategoryIds:state.deletedCategoryIds||[]
+};
+const merged=mergeDriveData(local,remote);
 
-    const local={
-      ...state,
-      deletedExpenseIds:state.deletedExpenseIds||[],
-      deletedCategoryIds:state.deletedCategoryIds||[]
-    };
-    const merged=mergeDriveData(local,remote);
+// Keep the current in-memory data safe until the merged data is saved.
+const previousState=state;
+state=merged;
 
-    state=merged;
-    if(!save())throw new Error('Could not save the merged data on this device.');
+if(!save()){
+  state=previousState;
 
+  if(typeof render==='function'){
+    render();
+  }
+
+  throw new Error(
+    'Could not save the merged data on this device. Previous data has been restored.'
+  );
+}
     const backup={
       app:'My Expense Tracker',
       version:1,
