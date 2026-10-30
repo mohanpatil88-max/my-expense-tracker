@@ -1097,17 +1097,32 @@ $('importFile').addEventListener('change',async e=>{
     if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;
 
     const categories=parsed.categories
-      .filter(c=>c&&typeof c.id==='string'&&c.id.trim()&&typeof c.name==='string'&&c.name.trim())
+      .filter(c=>
+        c&&typeof c.id==='string'&&c.id.trim()&&
+        typeof c.name==='string'&&c.name.trim()
+      )
       .map(c=>({
         id:c.id,
         name:c.name.trim(),
-        emoji:String(c.emoji||'📌'),
+        emoji:String(c.emoji||'📌').slice(0,12),
         createdAt:Number(c.createdAt)||Date.now(),
         updatedAt:Number(c.updatedAt)||Number(c.createdAt)||Date.now()
       }));
 
     const expenses=parsed.expenses
-      .filter(x=>x&&typeof x.id==='string'&&x.id.trim()&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&typeof x.date==='string')
+      .filter(x=>{
+        if(!x||typeof x.id!=='string'||!x.id.trim())return false;
+
+        const amount=Number(x.amount);
+        const date=x.date;
+        const parsedDate=new Date(String(date)+'T12:00:00');
+
+        return Number.isFinite(amount)&&amount>0&&amount<=999999999&&
+          typeof date==='string'&&
+          /^\d{4}-\d{2}-\d{2}$/.test(date)&&
+          !isNaN(parsedDate.getTime())&&
+          parsedDate.toISOString().slice(0,10)===date;
+      })
       .map(x=>({
         id:x.id,
         amount:Number(x.amount),
@@ -1118,7 +1133,9 @@ $('importFile').addEventListener('change',async e=>{
         updatedAt:Number(x.updatedAt)||Number(x.createdAt)||Date.now()
       }));
 
-    if(!categories.length)throw new Error('Backup contains no valid categories.');
+    if(!categories.length){
+      throw new Error('Backup contains no valid categories.');
+    }
 
     const importedExpenseIds=new Set(expenses.map(x=>x.id));
     const importedCategoryIds=new Set(categories.map(x=>x.id));
@@ -1135,21 +1152,22 @@ $('importFile').addEventListener('change',async e=>{
       ...state.categories.filter(x=>!importedCategoryIds.has(x.id)).map(x=>x.id)
     ])].filter(id=>typeof id==='string'&&!importedCategoryIds.has(id));
 
-    state={
-      version:1,
-      categories,
-      expenses,
-      deletedExpenseIds,
-      deletedCategoryIds
-    };
+    const success=commitState(()=>{
+      state={
+        version:1,
+        categories,
+        expenses,
+        deletedExpenseIds,
+        deletedCategoryIds
+      };
+    },'Backup restored successfully');
 
-    if(!save())throw new Error('Could not save restored data on this device.');
-
-    render();
-    toast('Backup restored successfully');
-    announce('Your backup has been restored.','success');
+    if(success){
+      announce('Your backup has been restored.','success');
+    }
 
   }catch(err){
+    console.error('Backup restore failed:',err);
     toast(err.message||'Could not restore this backup');
     announce(err.message||'Backup restore failed.','error');
   }finally{
