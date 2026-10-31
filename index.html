@@ -585,6 +585,11 @@ canvas {
    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
      <input type="file" id="quickQueueFiles" accept=".jsonl,.json,application/json,text/plain" multiple class="hidden">
    <div style="margin-top:10px"><button class="ghost" style="width:100%" onclick="exportCSV()">Export expenses as CSV</button></div>
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+  <strong>Quick Expense Queue</strong>
+  <p class="settings-note">Import expenses saved by your iPhone Quick Expense shortcut. Imported entries are added to your existing records; your existing expenses will not be replaced.</p>
+  <button class="secondary" type="button" style="width:100%" onclick="document.getElementById('quickQueueFiles').click()">Import pending Quick Expenses</button>
+</div>
   </div>
     
   <div class="card" style="padding:18px">
