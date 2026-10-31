@@ -2019,10 +2019,74 @@ document.addEventListener('visibilitychange',()=>{
     syncGoogleDrive();
   }
 });
- // Quick-entry deep link
-if (new URLSearchParams(window.location.search).get('quick') === '1') {
-  setTimeout(() => window.openExpense(), 250);
+
+// Quick Expense automatic save
+const quickParams = new URLSearchParams(window.location.search);
+
+if (quickParams.get('quickSave') === '1') {
+  // Remove the one-time request immediately to prevent duplicate saves on refresh.
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname + window.location.hash
+  );
+
+  setTimeout(() => {
+    try {
+      const amountText = quickParams.get('amount') || '';
+      const categoryInput = (quickParams.get('category') || '').trim();
+
+      // Validate the amount strictly.
+      if (!/^\d{1,9}(\.\d{1,2})?$/.test(amountText)) {
+        announce('Quick Expense failed: Enter a valid amount.', 'error');
+        return;
+      }
+
+      const amount = Number(amountText);
+
+      if (!Number.isFinite(amount) || amount <= 0 || amount > 999999999) {
+        announce('Quick Expense failed: Amount is outside the allowed range.', 'error');
+        return;
+      }
+
+      // Match either the category ID or its current name.
+      const selectedCategory = state.categories.find(c =>
+        c.id === categoryInput ||
+        c.name.toLowerCase() === categoryInput.toLowerCase()
+      );
+
+      if (!selectedCategory) {
+        announce('Quick Expense failed: Category not found. Check your shortcut category list.', 'error');
+        return;
+      }
+
+      if (dataReadOnly) {
+        announce('Quick Expense was not saved because the app is in read-only recovery mode.', 'error');
+        return;
+      }
+
+      const success = commitState(() => {
+        state.expenses.push({
+          id: uid(),
+          amount,
+          date: today(),
+          categoryId: selectedCategory.id,
+          note: '',
+          createdAt: Date.now()
+        });
+      }, 'Quick Expense saved successfully');
+
+      if (success) {
+        showPage('dashboard');
+      }
+
+    } catch (error) {
+      console.error('Quick Expense error:', error);
+      announce('Quick Expense could not be saved. Please open the app and try again.', 'error');
+    }
+  }, 400);
 }
+ 
 })();
 </script>
 
