@@ -1036,6 +1036,7 @@ async function cloudRequest(functionName,payload){
   return response.json();
 }
 
+
 async function syncSupabase(){
   if(cloudSyncInProgress){
     cloudSyncQueued=true;
@@ -1062,10 +1063,10 @@ async function syncSupabase(){
   cloudSyncInProgress=true;
   cloudSyncQueued=false;
 
-  setCloudStatus('Synchronizing your expenses…');
+  setCloudStatus('Synchronizing and protecting your expenses…');
 
   try{
-    // Read cloud data first. Never replace local data with an empty response.
+    // Read cloud data before making any changes.
     const remoteResult=await cloudRequest(
       'get_expense_tracker_data',
       {p_code:code}
@@ -1075,20 +1076,61 @@ async function syncSupabase(){
       throw new Error('Private sync code is invalid. Verify it again.');
     }
 
-    const remote=remoteResult.data;
+    const cloudPayload=remoteResult.data;
 
-    if(
-      !remote ||
-      !Array.isArray(remote.categories) ||
-      !Array.isArray(remote.expenses)
-    ){
-      throw new Error('Cloud data format is invalid. Local data was not replaced.');
+    if(!cloudPayload||typeof cloudPayload!=='object'){
+      throw new Error('Cloud backup is empty or invalid. Local data was not changed.');
     }
 
-    // Merge the latest in-memory local state with cloud records.
+    let remote;
+
+    // Decrypt new-format cloud backups.
+    if(cloudPayload.__expense_tracker_encrypted===true){
+      remote=await decryptCloudData(cloudPayload,code);
+    }else{
+      // Accept the existing legacy plaintext backup for migration.
+      if(
+        !Array.isArray(cloudPayload.categories)||
+        !Array.isArray(cloudPayload.expenses)
+      ){
+        throw new Error('Cloud backup format is invalid. Local data was not changed.');
+      }
+
+      remote=cloudPayload;
+    }
+
+    // Validate local data before merging.
+    if(
+      !state||
+      !Array.isArray(state.categories)||
+      !Array.isArray(state.expenses)
+    ){
+      throw new Error('Local expense data failed validation. Nothing was uploaded.');
+    }
+
+    // Merge local and cloud records without discarding either side.
     const merged=mergeDriveData(state,remote);
 
-    // Keep a rollback copy until local persistence succeeds.
+    if(
+      !Array.isArray(merged.categories)||
+      !Array.isArray(merged.expenses)
+    ){
+      throw new Error('Merged data failed validation. Nothing was uploaded.');
+    }
+
+    // Encrypt before changing the cloud backup.
+    const encryptedPayload=await encryptCloudData(
+      {
+        version:1,
+        categories:merged.categories,
+        expenses:merged.expenses,
+        deletedExpenseIds:merged.deletedExpenseIds||[],
+        deletedCategoryIds:merged.deletedCategoryIds||[]
+      },
+      code
+    );
+
+    // Save locally with rollback protection.
     const previousState=state;
     state=merged;
 
@@ -1104,25 +1146,19 @@ async function syncSupabase(){
       render();
     }
 
-    // Upload the merged result.
+    // Upload encrypted data only.
     await cloudRequest(
       'save_expense_tracker_data',
       {
         p_code:code,
-        p_data:{
-          version:1,
-          categories:state.categories,
-          expenses:state.expenses,
-          deletedExpenseIds:state.deletedExpenseIds||[],
-          deletedCategoryIds:state.deletedCategoryIds||[]
-        }
+        p_data:encryptedPayload
       }
     );
 
     const now=new Date();
 
     setCloudStatus(
-      'Connected · Last synced '+now.toLocaleString()
+      'Secure cloud backup successful · '+now.toLocaleString()
     );
 
     localStorage.setItem(
@@ -1131,10 +1167,10 @@ async function syncSupabase(){
     );
 
   }catch(error){
-    console.error('Supabase sync failed:',error);
+    console.error('Supabase secure sync failed:',error);
 
     setCloudStatus(
-      'Sync failed. Your device data is still saved. '+error.message
+      'Cloud sync failed. Your device data remains saved. '+error.message
     );
 
   }finally{
@@ -1146,6 +1182,7 @@ async function syncSupabase(){
     }
   }
 }
+
 
 window.syncSupabase=syncSupabase;
 
