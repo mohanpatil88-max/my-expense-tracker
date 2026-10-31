@@ -1877,7 +1877,156 @@ window.exportBackup=function(){
   toast('Backup export started');
 };
 window.exportCSV=function(){const rows=[['Date','Amount INR','Category','Note'],...state.expenses.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>[e.date,Number(e.amount).toFixed(2),category(e.categoryId).name,e.note||''])];const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('expenses-'+today()+'.csv','\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV export started')};
-$('importFile').addEventListener('change',async e=>{
+// Import Quick Expense Queue — additive only; never replaces existing records.
+$('quickQueueFiles').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+
+  try {
+    if (dataReadOnly) {
+      throw new Error('Import paused to protect your saved data.');
+    }
+
+    if (!localStorage.getItem(CLOUD_CODE_KEY)) {
+      throw new Error('Open Private Cloud Sync and verify your private sync code before importing.');
+    }
+
+    const existingIds = new Set((state.expenses || []).map(x => x.id));
+    const seenIds = new Set();
+    const deletedIds = new Set(state.deletedExpenseIds || []);
+    const additions = [];
+    let invalidCount = 0;
+    let duplicateCount = 0;
+
+    const validDate = value => {
+      if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const d = new Date(value + 'T12:00:00');
+      return !isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+    };
+
+    for (const file of files) {
+      const content = await file.text();
+      const lines = content.split(/\r?\n/);
+
+      for (const line of lines) {
+        if (!line.trim()) continue;
+
+        try {
+          const item = JSON.parse(line);
+          const amount = Number(item.amount);
+
+          if (
+            !item ||
+            typeof item.id !== 'string' ||
+            !item.id.trim() ||
+            !Number.isFinite(amount) ||
+            amount <= 0 ||
+            amount > 999999999 ||
+            Math.round(amount * 100) !== amount * 100 ||
+            !validDate(item.date) ||
+            typeof item.category !== 'string'
+          ) {
+            invalidCount++;
+            continue;
+          }
+
+          const matchedCategory = state.categories.find(c =>
+            c.id === item.category ||
+            c.name.toLowerCase() === item.category.trim().toLowerCase()
+          );
+
+          if (!matchedCategory) {
+            invalidCount++;
+            continue;
+          }
+
+          if (
+            existingIds.has(item.id) ||
+            seenIds.has(item.id) ||
+            deletedIds.has(item.id)
+          ) {
+            duplicateCount++;
+            continue;
+          }
+
+          const timestamp = Number(item.createdAt) || Date.now();
+
+          additions.push({
+            id: item.id,
+            amount,
+            date: item.date,
+            categoryId: matchedCategory.id,
+            note: '',
+            createdAt: timestamp,
+            updatedAt: timestamp
+          });
+
+          seenIds.add(item.id);
+        } catch (_) {
+          invalidCount++;
+        }
+      }
+    }
+
+    if (!additions.length) {
+      if (duplicateCount && !invalidCount) {
+        toast('No new entries. All queue entries were already imported.');
+      } else {
+        announce(
+          'No valid new entries found. Check the queue file and category names.',
+          'warning'
+        );
+      }
+      return;
+    }
+
+    const beforeSync = localStorage.getItem(STORAGE_KEY + '_cloud_last_sync');
+
+    const saved = commitState(() => {
+      state.expenses = [...state.expenses, ...additions];
+    }, 'Quick Expenses added');
+
+    if (!saved) {
+      throw new Error('Could not save the imported expenses on this device.');
+    }
+
+    announce(
+      additions.length + ' Quick Expense entr' +
+      (additions.length === 1 ? 'y added' : 'ies added') +
+      ' on this device. Checking secure cloud backup…',
+      'success'
+    );
+
+    await syncSupabase();
+
+    const afterSync = localStorage.getItem(STORAGE_KEY + '_cloud_last_sync');
+
+    if (afterSync && afterSync !== beforeSync) {
+      announce(
+        additions.length + ' Quick Expenses imported and securely backed up.' +
+        (invalidCount ? ' Invalid lines skipped: ' + invalidCount + '.' : ''),
+        'success'
+      );
+    } else {
+      announce(
+        'Expenses are saved on this device, but cloud backup is not yet confirmed. Keep the queue file and retry sync.',
+        'warning'
+      );
+    }
+
+    if (duplicateCount) {
+      toast(duplicateCount + ' duplicate entr' +
+        (duplicateCount === 1 ? 'y was' : 'ies were') + ' skipped.');
+    }
+
+  } catch (error) {
+    console.error('Quick Expense queue import failed:', error);
+    announce(error.message || 'Quick Expense import failed.', 'error');
+  } finally {
+    e.target.value = '';
+  }
+});
+      $('importFile').addEventListener('change',async e=>{
   const file=e.target.files?.[0];
   if(!file)return;
 
