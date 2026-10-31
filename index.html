@@ -8,6 +8,397 @@
 <style>
 :root{--bg:#f4f7f5;--card:#fff;--ink:#172b25;--muted:#718079;--green:#1e6650;--green2:#e2f1e9;--line:#e3ebe6;--red:#b63d3d;--amber:#9a6716;--shadow:0 8px 28px rgba(27,65,49,.07)}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding-bottom:90px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:760px;margin:auto;padding:0 16px 24px}.hero{margin:0 -16px 18px;padding:calc(20px + env(safe-area-inset-top)) 22px 25px;background:linear-gradient(135deg,#163e34,#246b53);color:white;border-radius:0 0 28px 28px}.topline{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:13px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;font-weight:700}.hero h1{font-size:27px;line-height:1.15;margin:13px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:#d6e9df;font-size:14px}.month-row{display:flex;align-items:center;gap:10px;margin-top:22px}.month-row label{font-size:12px;color:#d6e9df}.month-row input{border:1px solid #ffffff45;background:#ffffff15;color:white;border-radius:11px;padding:9px;min-width:0}.month-row input::-webkit-calendar-picker-indicator{filter:invert(1)}.summary{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:-2px}.panel,.card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}.summary .panel{padding:17px}.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:750}.big-total{font-size:clamp(25px,6vw,34px);font-weight:800;letter-spacing:-.04em;margin:8px 0 5px;overflow-wrap:anywhere}.small-note{font-size:12px;color:var(--muted)}.mini-total{font-size:23px;font-weight:800;margin:10px 0 4px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 2px 12px}.section-head h2{font-size:18px;margin:0;letter-spacing:-.02em}.link-btn{background:transparent;border:0;color:var(--green);font-weight:750;padding:8px 2px}.primary{background:var(--green);color:white;border:0;border-radius:14px;padding:13px 16px;font-weight:750;box-shadow:0 5px 14px #1e665025}.secondary{background:var(--green2);color:var(--green);border:0;border-radius:12px;padding:10px 12px;font-weight:700}.ghost{background:#f4f7f5;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:650}.danger{background:#fff0f0;color:var(--red);border:0;border-radius:10px;padding:9px 11px;font-weight:700}.category-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.cat-card{border:1px solid var(--line);background:#fff;border-radius:16px;padding:13px;min-width:0}.cat-top{display:flex;align-items:center;gap:10px}.cat-icon{height:38px;width:38px;border-radius:13px;background:var(--green2);display:grid;place-items:center;font-size:19px;flex-shrink:0}.cat-name{font-weight:750;font-size:13px;line-height:1.25;overflow-wrap:anywhere}.cat-amount{font-size:17px;font-weight:800;margin-top:13px}.bar{height:5px;background:#edf2ef;border-radius:8px;margin-top:9px;overflow:hidden}.bar span{display:block;height:100%;background:#4c9a76;border-radius:8px}.list{display:flex;flex-direction:column;gap:9px}.expense{display:flex;align-items:center;gap:12px;padding:13px;background:white;border:1px solid var(--line);border-radius:16px}.expense .cat-icon{width:42px;height:42px}.exp-main{flex:1;min-width:0}.exp-title{font-size:14px;font-weight:750;overflow-wrap:anywhere}.exp-sub{font-size:12px;color:var(--muted);margin-top:4px}.exp-right{text-align:right;flex-shrink:0}.exp-amount{font-weight:800;font-size:15px}.actions{display:flex;gap:6px;margin-top:7px;justify-content:flex-end}.tiny{font-size:11px;border:0;background:#f2f6f3;color:var(--green);border-radius:8px;padding:6px 8px;font-weight:700}.empty{padding:28px 18px;text-align:center;background:white;border:1px dashed #cbd9d0;border-radius:18px;color:var(--muted)}.empty .emoji{font-size:32px;margin-bottom:9px}.empty strong{display:block;color:var(--ink);margin-bottom:5px}.bottom-nav{position:fixed;bottom:0;left:0;right:0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:#ffffffed;backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:10}.nav-inner{width:100%;max-width:650px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.nav-btn{border:0;background:transparent;color:#7a8981;border-radius:12px;padding:8px 3px;font-size:11px;font-weight:700;display:flex;align-items:center;flex-direction:column;gap:4px}.nav-btn span{font-size:19px}.nav-btn.active{background:var(--green2);color:var(--green)}.fab{position:fixed;right:max(20px,calc((100vw - 720px)/2));bottom:88px;border:0;border-radius:18px;width:58px;height:58px;background:var(--green);color:white;font-size:29px;box-shadow:0 10px 25px #1e66504a;z-index:5}.page{display:none}.page.active{display:block}.form-card{padding:18px}.field{margin-bottom:15px}.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:13px 12px;border:1px solid #dce6df;background:#fbfdfb;border-radius:12px;color:var(--ink);outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#4b9a76;box-shadow:0 0 0 3px #4b9a761c}.field textarea{min-height:75px;resize:vertical}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-actions{display:flex;gap:9px}.form-actions button{flex:1}.category-manage{display:flex;align-items:center;gap:10px;padding:12px;background:white;border:1px solid var(--line);border-radius:14px;margin-bottom:8px}.category-manage .cat-name{flex:1}.pill{display:inline-flex;align-items:center;border-radius:99px;background:#edf5ef;color:#28674e;padding:5px 9px;font-size:11px;font-weight:750}.notice{border-radius:12px;padding:11px 13px;font-size:13px;margin-bottom:12px;display:none}.notice.show{display:block}.notice.success{background:#e8f6ed;color:#236643}.notice.error{background:#fff0f0;color:#a33232}.notice.info{background:#edf4ff;color:#285b9b}.report-row{display:flex;align-items:center;gap:10px;margin:14px 0}.report-row .cat-name{width:115px}.report-track{flex:1;height:8px;background:#edf2ef;border-radius:8px;overflow:hidden}.report-track span{height:100%;display:block;background:#4c9a76;border-radius:8px}.report-value{font-size:12px;font-weight:750;min-width:75px;text-align:right}.backup-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.settings-note{font-size:13px;color:var(--muted);line-height:1.5}.modal-backdrop{display:none;position:fixed;inset:0;background:#10251dc0;z-index:30;align-items:flex-end;justify-content:center;padding:12px}.modal-backdrop.open{display:flex}.modal{width:100%;max-width:600px;background:var(--bg);border-radius:24px 24px 18px 18px;padding:20px;max-height:90vh;overflow:auto;box-shadow:0 20px 70px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:17px}.modal-head h2{font-size:20px;margin:0}.close{border:0;background:#e7eee9;border-radius:10px;width:36px;height:36px;font-size:20px}.toast{position:fixed;top:calc(12px + env(safe-area-inset-top));left:50%;transform:translate(-50%,-140%);transition:transform .25s;z-index:50;background:#173f35;color:white;padding:12px 17px;border-radius:13px;box-shadow:var(--shadow);font-size:13px;font-weight:700;width:max-content;max-width:calc(100vw - 28px)}.toast.show{transform:translate(-50%,0)}.footnote{font-size:11px;color:var(--muted);line-height:1.5;margin-top:16px}.hidden{display:none!important}@media(min-width:600px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hero{border-radius:0 0 30px 30px}.app{padding-left:22px;padding-right:22px}.hero{margin-left:-22px;margin-right:-22px}.modal-backdrop{align-items:center}.modal{border-radius:24px}}
+
+/* ==========================================
+   MY EXPENSE TRACKER — UI ENHANCEMENT
+   Part 1 | Preserve existing app functionality
+   ========================================== */
+
+:root {
+  --bg: #f3f6f4;
+  --card: #ffffff;
+  --ink: #172b25;
+  --muted: #718079;
+  --green: #17634b;
+  --green2: #e4f1e9;
+  --line: #e1e9e4;
+  --red: #b63d3d;
+  --amber: #9a6716;
+  --shadow: 0 8px 28px rgba(27,65,49,.065);
+  --shadow-hover: 0 12px 30px rgba(27,65,49,.11);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top left, #e8f1eb 0%, transparent 38%),
+    var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease,
+    background .16s ease;
+}
+
+button:active {
+  transform: scale(.97);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #78b99a;
+  outline-offset: 3px;
+}
+
+/* Header */
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(135deg, #123c31 0%, #1d624b 58%, #28765a 100%);
+  box-shadow: 0 12px 30px rgba(18,60,49,.16);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 240px;
+  height: 240px;
+  right: -85px;
+  top: -115px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.16), transparent 70%);
+  pointer-events: none;
+}
+
+.hero h1 {
+  font-size: clamp(27px, 7vw, 34px);
+  font-weight: 800;
+  letter-spacing: -.045em;
+}
+
+.hero p {
+  line-height: 1.55;
+}
+
+/* Main dashboard */
+.app {
+  padding-bottom: 30px;
+}
+
+.summary {
+  gap: 11px;
+}
+
+.summary .panel {
+  min-width: 0;
+  padding: 17px 15px;
+  border-radius: 19px;
+  box-shadow: var(--shadow);
+}
+
+.big-total {
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.mini-total,
+.exp-amount,
+.cat-amount,
+.report-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.section-head {
+  margin-top: 27px;
+  margin-bottom: 13px;
+}
+
+.section-head h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* Cards */
+.panel,
+.card,
+.cat-card,
+.expense,
+.category-manage {
+  transition:
+    box-shadow .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+.cat-card,
+.expense,
+.category-manage {
+  border-color: #e5ece7;
+  box-shadow: 0 3px 12px rgba(27,65,49,.035);
+}
+
+.cat-card {
+  padding: 15px;
+  border-radius: 17px;
+}
+
+.cat-card:active,
+.expense:active {
+  transform: scale(.99);
+}
+
+.expense {
+  border-radius: 17px;
+  padding: 14px;
+}
+
+.exp-title {
+  line-height: 1.4;
+}
+
+.exp-sub {
+  line-height: 1.45;
+}
+
+/* Buttons */
+.primary {
+  background: linear-gradient(135deg, #17634b, #28775a);
+  box-shadow: 0 5px 14px rgba(30,102,80,.16);
+}
+
+.primary:active {
+  box-shadow: none;
+}
+
+.secondary {
+  background: #e5f2e9;
+}
+
+.ghost {
+  background: #f7f9f7;
+}
+
+.danger {
+  background: #fff1f1;
+}
+
+.link-btn {
+  border-radius: 9px;
+  padding: 9px 8px;
+}
+
+/* Inputs */
+.field input,
+.field select,
+.field textarea {
+  min-height: 47px;
+  border-color: #dce6df;
+  background: #fff;
+  border-radius: 13px;
+  font-size: 15px;
+}
+
+.field textarea {
+  min-height: 88px;
+}
+
+.field label {
+  letter-spacing: .035em;
+}
+
+.form-row {
+  gap: 10px;
+}
+
+/* Category and report visuals */
+.cat-icon {
+  border-radius: 14px;
+  background: linear-gradient(145deg, #eaf4ed, #dceee3);
+}
+
+.bar,
+.report-track {
+  background: #edf2ef;
+  border-radius: 20px;
+}
+
+.bar span,
+.report-track span {
+  border-radius: 20px;
+}
+
+.report-row {
+  gap: 9px;
+}
+
+.report-row .cat-name {
+  width: 108px;
+  overflow-wrap: anywhere;
+}
+
+/* Navigation */
+.bottom-nav {
+  background: rgba(255,255,255,.94);
+  border-top: 1px solid rgba(220,231,223,.9);
+  box-shadow: 0 -7px 25px rgba(23,53,39,.055);
+  padding-top: 10px;
+}
+
+.nav-inner {
+  max-width: 600px;
+}
+
+.nav-btn {
+  min-height: 53px;
+  border-radius: 14px;
+  font-size: 11px;
+}
+
+.nav-btn span {
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.nav-btn.active {
+  background: #e7f3eb;
+  color: #17634b;
+}
+
+/* Add expense button */
+.fab {
+  width: 59px;
+  height: 59px;
+  border-radius: 19px;
+  background: linear-gradient(145deg, #1d7657, #155b43);
+  box-shadow: 0 9px 24px rgba(22,99,75,.30);
+  font-size: 30px;
+}
+
+/* Forms and modal */
+.modal-backdrop {
+  background: rgba(12,31,23,.62);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.modal {
+  border: 1px solid rgba(255,255,255,.7);
+  border-radius: 25px 25px 18px 18px;
+  padding: 21px;
+  box-shadow: 0 20px 70px rgba(0,0,0,.22);
+}
+
+.modal-head h2 {
+  font-weight: 800;
+  letter-spacing: -.025em;
+}
+
+.close {
+  flex-shrink: 0;
+}
+
+/* Feedback and empty states */
+.notice,
+.toast {
+  line-height: 1.45;
+}
+
+.empty {
+  border-radius: 18px;
+  background: rgba(255,255,255,.8);
+  line-height: 1.55;
+}
+
+.pill {
+  white-space: nowrap;
+}
+
+/* Desktop interaction */
+@media (hover: hover) and (pointer: fine) {
+  .cat-card:hover,
+  .expense:hover,
+  .category-manage:hover {
+    border-color: #c9ddd0;
+    box-shadow: var(--shadow-hover);
+  }
+
+  .primary:hover {
+    box-shadow: 0 8px 20px rgba(30,102,80,.23);
+  }
+
+  .secondary:hover,
+  .ghost:hover {
+    filter: brightness(.97);
+  }
+}
+
+/* Small mobile screens */
+@media (max-width: 380px) {
+  .app {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hero {
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  .summary {
+    gap: 8px;
+  }
+
+  .summary .panel {
+    padding: 14px 11px;
+  }
+
+  .big-total {
+    font-size: 24px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .report-row .cat-name {
+    width: 88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+/* Five-item mobile bottom navigation */
+.nav-inner {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.nav-btn {
+  font-size: 10px;
+  padding-left: 1px;
+  padding-right: 1px;
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -63,7 +454,70 @@
  <section id="backupPage" class="page">
   <div class="section-head"><h2>Backup & settings</h2></div>
   <div class="card" style="padding:18px;margin-bottom:13px">
-   <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No account, no cloud sync, no subscription.</div></div></div>
+  
+<div class="card" style="padding:18px;margin-bottom:13px">
+  <div class="cat-top">
+    <div class="cat-icon">🔄</div>
+    <div>
+      <strong>Automatic cloud sync</strong>
+      <div class="small-note" id="cloudStatus" style="margin-top:4px">
+        Private sync code not configured
+      </div>
+    </div>
+  </div>
+
+  <p class="settings-note">
+    Connect once with your private sync code. Your data stays saved
+    on this device and will be synchronized with your cloud database
+    when automatic sync is enabled.
+  </p>
+
+  <div class="field">
+    <label for="cloudSyncCode">PRIVATE SYNC CODE</label>
+    <input
+      id="cloudSyncCode"
+      type="password"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+      placeholder="Enter your private sync code"
+    >
+  </div>
+
+  <button class="primary" id="cloudConnectBtn"
+    type="button" onclick="testCloudSyncCode()" style="width:100%">
+    Verify private code
+  </button>
+</div>
+
+     <div class="cat-top">
+    <div class="cat-icon">☁️</div>
+    <div>
+      <strong>Google Drive backup & sync</strong>
+      <div class="small-note" id="driveStatus" style="margin-top:4px">
+        Not connected · Data is saved on this device
+      </div>
+    </div>
+  </div>
+  <p class="settings-note">
+    Connect your Google account to keep a private backup in Google Drive.
+    When connected, changes can sync automatically whenever you're online.
+  </p>
+  <div class="backup-buttons">
+<button class="primary" id="driveConnectBtn" type="button">
+  Connect Google Drive
+</button>
+
+<button class="secondary" id="driveSyncBtn" type="button" disabled>
+  Sync now
+</button>
+  </div>
+  <div class="small-note" id="driveLastSync" style="margin-top:10px">
+    No Drive backup yet
+  </div>
+</div>
+  <div class="card" style="padding:18px;margin-bottom:13px">
+   <div class="cat-top"><div class="cat-icon">🛡️</div><div><strong>Your data stays on this device</strong><div class="small-note" style="margin-top:4px">No separate app login or subscription. Google Drive sync is available when connected.</div></div></div>
    <p class="settings-note">Export a backup regularly. Browser data can be lost if you clear website data or remove the browser app. A backup file lets you restore your records.</p>
    <div class="backup-buttons"><button class="primary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Restore backup</button></div>
    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
@@ -77,12 +531,25 @@
  </section>
 </main>
 <button class="fab" id="fab" aria-label="Add expense" onclick="openExpense()">＋</button>
-<nav class="bottom-nav" aria-label="Main navigation"><div class="nav-inner">
- <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')"><span>⌂</span>Home</button>
- <button class="nav-btn" data-page="history" onclick="showPage('history')"><span>≡</span>Expenses</button>
- <button class="nav-btn" data-page="reports" onclick="showPage('reports')"><span>▥</span>Reports</button>
- <button class="nav-btn" data-page="categories" onclick="showPage('categories')"><span>◈</span>Categories</button>
-</div></nav>
+<nav class="bottom-nav" aria-label="Main navigation">
+ <div class="nav-inner">
+  <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">
+   <span>⌂</span>Home
+  </button>
+  <button class="nav-btn" data-page="history" onclick="showPage('history')">
+   <span>≡</span>Expenses
+  </button>
+  <button class="nav-btn" data-page="reports" onclick="showPage('reports')">
+   <span>▥</span>Reports
+  </button>
+  <button class="nav-btn" data-page="categories" onclick="showPage('categories')">
+   <span>◈</span>Categories
+  </button>
+  <button class="nav-btn" data-page="backup" onclick="showPage('backup')">
+   <span>⚙</span>Settings
+  </button>
+ </div>
+</nav>
 <div class="modal-backdrop" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
  <div class="modal"><div class="modal-head"><h2 id="expenseModalTitle">Add expense</h2><button class="close" onclick="closeModal('expenseModal')" aria-label="Close">×</button></div>
  <form id="expenseForm">
@@ -103,59 +570,33 @@
  </form>
  </div>
 </div>
- 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+ <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <script>
-(function(){
-'use strict';
+   (function(){
+const STORAGE_KEY='myExpenseTracker_v1';  
+const SUPABASE_URL='https://lxrzpmptadzbffwiovae.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_4hkB_6OBNc-GaJrwjbzvuQ__4F_fl2d';
+const CLOUD_CODE_KEY=STORAGE_KEY+'_cloud_code';
+
+const DRIVE_PENDING_KEY=STORAGE_KEY+'_drive_pending';
+const DRIVE_LAST_SYNC_KEY=STORAGE_KEY+'_drive_last_sync'; 
+const GOOGLE_CLIENT_ID='923822466261-anrbm5j98p7iboej0a7h1j11hkpfqdn7.apps.googleusercontent.com';
+const GOOGLE_DRIVE_SCOPE='https://www.googleapis.com/auth/drive.file';
+let googleAccessToken=null;
+let googleTokenExpiresAt=0;
+let googleTokenClient=null;
+let driveBackupFileId=null;
+let driveSyncTimer=null;
+let driveSyncInProgress=false;
+      
+let cloudSyncTimer=null;
+let cloudSyncInProgress=false;
+let cloudSyncQueued=false;
+
+let driveSyncApplying=false;
  
-const SUPABASE_URL = 'https://lxrzpmptadzbfwiovae.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_4hkB_6OBNc-GaJrwjbzvuQ__4F_fl2d';
-
-async function registerUser(email, password) {
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email.trim(),
-    password: password
-  });
-
-  if (error) {
-    alert("Registration failed: " + error.message);
-    return false;
-  }
-
-  alert("Registration successful! Please check your email and confirm your account before signing in.");
-  return true;
-}
-
-async function loginUser(email, password) {
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email: email.trim(),
-    password: password
-  });
-
-  if (error) {
-    alert("Login failed: " + error.message);
-    return false;
-  }
-
-  alert("Login successful!");
-  return true;
-}
-
-async function logoutUser() {
-  const { error } = await supabaseClient.auth.signOut();
-
-  if (error) {
-    alert("Logout failed: " + error.message);
-    return false;
-  }
-
-  alert("Logged out successfully.");
-  return true;
-}
-
-const STORAGE_KEY='myExpenseTracker_v1';
 const DEFAULT_CATEGORIES=[
  {id:'food',name:'Food & Dining',emoji:'🍽️'},{id:'groceries',name:'Groceries',emoji:'🛒'},
  {id:'transport',name:'Transport',emoji:'🚗'},{id:'shopping',name:'Shopping',emoji:'🛍️'},
@@ -164,6 +605,7 @@ const DEFAULT_CATEGORIES=[
  {id:'personal',name:'Personal care',emoji:'✨'},{id:'misc',name:'Miscellaneous',emoji:'📦'}
 ];
 let state={version:1,categories:DEFAULT_CATEGORIES.map(x=>({...x})),expenses:[]};
+let dataReadOnly=false;
 let toastTimer;
 const $=id=>document.getElementById(id);
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
@@ -173,8 +615,983 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600)}
 function announce(msg,type='info'){const el=$('notice');el.textContent=msg;el.className='notice show '+type;setTimeout(()=>el.classList.remove('show'),5000)}
-function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true}catch(e){toast('Could not save. Export a backup and check device storage.');return false}}
-function load(){try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(parsed&&Array.isArray(parsed.categories)&&Array.isArray(parsed.expenses)){state={version:1,categories:parsed.categories,expenses:parsed.expenses};return}}}catch(e){announce('Saved data could not be read. Your browser storage may be damaged.','error')} }
+function setDriveStatus(message){
+  const el=document.getElementById('driveStatus');
+  if(el)el.textContent=message;
+}
+
+function setDriveLastSync(message){
+  const el=document.getElementById('driveLastSync');
+  if(el)el.textContent=message;
+}
+
+function setCloudStatus(message){
+  const el=document.getElementById('cloudStatus');
+  if(el)el.textContent=message;
+}
+
+// ==========================================
+// PRIVATE CLOUD DATA ENCRYPTION
+// AES-256-GCM + PBKDF2-SHA256
+// ==========================================
+
+const CLOUD_ENCRYPTION_ITERATIONS = 310000;
+const CLOUD_ENCRYPTION_FORMAT = 'expense-tracker-encrypted';
+
+function bytesToBase64(bytes){
+  let binary = '';
+  const chunkSize = 0x8000;
+
+  for(let i = 0; i < bytes.length; i += chunkSize){
+    binary += String.fromCharCode(
+      ...bytes.subarray(i, i + chunkSize)
+    );
+  }
+
+  return btoa(binary);
+}
+
+function base64ToBytes(value){
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+
+  for(let i = 0; i < binary.length; i++){
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+}
+
+async function deriveCloudEncryptionKey(code, salt){
+  if(!window.crypto?.subtle){
+    throw new Error('Secure encryption is not supported by this browser.');
+  }
+
+  const material = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(code),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: CLOUD_ENCRYPTION_ITERATIONS,
+      hash: 'SHA-256'
+    },
+    material,
+    {
+      name: 'AES-GCM',
+      length: 256
+    },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptCloudData(data, code){
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const key = await deriveCloudEncryptionKey(code, salt);
+
+  const plaintext = new TextEncoder().encode(
+    JSON.stringify(data)
+  );
+
+  const ciphertext = await crypto.subtle.encrypt(
+    {
+      name: 'AES-GCM',
+      iv
+    },
+    key,
+    plaintext
+  );
+
+  return {
+    __expense_tracker_encrypted: true,
+    format: CLOUD_ENCRYPTION_FORMAT,
+    version: 1,
+    algorithm: 'AES-256-GCM',
+    kdf: 'PBKDF2-SHA256',
+    iterations: CLOUD_ENCRYPTION_ITERATIONS,
+    salt: bytesToBase64(salt),
+    iv: bytesToBase64(iv),
+    ciphertext: bytesToBase64(new Uint8Array(ciphertext))
+  };
+}
+
+async function decryptCloudData(payload, code){
+  if(
+    !payload ||
+    payload.__expense_tracker_encrypted !== true ||
+    payload.format !== CLOUD_ENCRYPTION_FORMAT ||
+    payload.version !== 1 ||
+    payload.algorithm !== 'AES-256-GCM' ||
+    payload.kdf !== 'PBKDF2-SHA256' ||
+    payload.iterations !== CLOUD_ENCRYPTION_ITERATIONS ||
+    !payload.salt ||
+    !payload.iv ||
+    !payload.ciphertext
+  ){
+    throw new Error('Encrypted cloud backup format is invalid.');
+  }
+
+  const salt = base64ToBytes(payload.salt);
+  const iv = base64ToBytes(payload.iv);
+  const ciphertext = base64ToBytes(payload.ciphertext);
+
+  if(salt.length !== 16 || iv.length !== 12){
+    throw new Error('Encrypted cloud backup is damaged.');
+  }
+
+  const key = await deriveCloudEncryptionKey(code, salt);
+
+  let plaintext;
+
+  try{
+    plaintext = await crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv
+      },
+      key,
+      ciphertext
+    );
+  }catch(error){
+    throw new Error(
+      'Cloud decryption failed. Your local expenses were not changed.'
+    );
+  }
+
+  let data;
+
+  try{
+    data = JSON.parse(
+      new TextDecoder().decode(plaintext)
+    );
+  }catch(error){
+    throw new Error('Decrypted cloud data is invalid.');
+  }
+
+  if(
+    !data ||
+    !Array.isArray(data.categories) ||
+    !Array.isArray(data.expenses)
+  ){
+    throw new Error('Decrypted expense data failed validation.');
+  }
+
+  return data;
+}
+
+window.testCloudSyncCode=async function(){
+  const input=document.getElementById('cloudSyncCode');
+  const button=document.getElementById('cloudConnectBtn');
+
+  const code=(input?.value||'').trim();
+
+  if(code.length<32){
+    setCloudStatus('Please enter your complete private sync code.');
+    announce('Please enter your private sync code.','error');
+    return;
+  }
+
+  if(!navigator.onLine){
+    setCloudStatus('You are offline. Internet is required for verification.');
+    announce('Please connect to the internet first.','warning');
+    return;
+  }
+
+  if(button)button.disabled=true;
+  setCloudStatus('Verifying your private connection…');
+
+  try{
+    const response=await fetch(
+      SUPABASE_URL+'/rest/v1/rpc/get_expense_tracker_data',
+      {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'apikey':SUPABASE_ANON_KEY,
+        },
+        body:JSON.stringify({p_code:code})
+      }
+    );
+
+    let result;
+
+    try{
+      result=await response.json();
+    }catch(parseError){
+      throw new Error('The server returned an invalid response.');
+    }
+
+    if(!response.ok){
+      throw new Error(
+        'Server verification failed ('+response.status+'). Check database setup.'
+      );
+    }
+
+    if(!result || result.ok!==true){
+      throw new Error('Incorrect private sync code. Please check and retry.');
+    }
+
+        const cloudData=result.data;
+
+    if(
+      !cloudData ||
+      typeof cloudData!=='object' ||
+      Array.isArray(cloudData)
+    ){
+      throw new Error('Cloud data format is invalid. No local data was changed.');
+    }
+
+    if(cloudData.__expense_tracker_encrypted===true){
+
+      // Verify that the encrypted backup can be decrypted.
+      // Do not change local expense data during this check.
+      await decryptCloudData(cloudData,code);
+
+    }else if(
+      !Array.isArray(cloudData.categories) ||
+      !Array.isArray(cloudData.expenses)
+    ){
+      throw new Error('Cloud data format is invalid. No local data was changed.');
+    }
+
+    localStorage.setItem(CLOUD_CODE_KEY,code);
+
+    if(input)input.value='';
+
+    setCloudStatus(
+      'Private code verified. Ready for automatic sync setup.'
+    );
+
+    announce('Private cloud connection verified successfully.','success');
+
+await syncSupabase();
+  }catch(error){
+    console.error('Cloud verification failed:',error);
+
+    setCloudStatus(error.message||'Connection failed. Please try again.');
+
+    announce(error.message||'Cloud verification failed.','error');
+
+  }finally{
+    if(button)button.disabled=false;
+  }
+};
+
+const savedCloudCode=localStorage.getItem(CLOUD_CODE_KEY);
+
+if(savedCloudCode){
+  setCloudStatus('Previously verified on this device. Automatic sync setup pending.');
+}
+
+function connectGoogleDrive(){
+  if(!navigator.onLine){
+    setDriveStatus('You are offline. Connect to the internet first.');
+    return;
+  }
+  if(!window.google?.accounts?.oauth2){
+    setDriveStatus('Google connection is still loading. Please try again.');
+    return;
+  }
+  if(!googleTokenClient){
+    googleTokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:GOOGLE_DRIVE_SCOPE,
+      callback:async response=>{
+        if(response.error||!response.access_token){
+          setDriveStatus('Google connection failed. Please try again.');
+          return;
+        }
+        googleAccessToken=response.access_token;
+googleTokenExpiresAt=Date.now()+
+  (Number(response.expires_in)||3600)*1000;
+
+const btn=document.getElementById('driveSyncBtn');
+        if(btn)btn.disabled=false;
+        setDriveStatus('Google Drive connected. Syncing your data…');
+        await syncGoogleDrive();
+      }
+    });
+  }
+  setDriveStatus('Waiting for Google authorization…');
+   googleTokenClient.requestAccessToken({
+  prompt: 'select_account',
+  hint: 'mohanpatil88@gmail.com'
+});
+}
+window.connectGoogleDrive = connectGoogleDrive;
+async function driveRequest(url,options={}){
+  const response=await fetch(url,{
+    ...options,
+    headers:{
+      Authorization:'Bearer '+googleAccessToken,
+      ...(options.headers||{})
+    }
+  });
+  if(!response.ok){
+    const detail=await response.text();
+    throw new Error('Google Drive error '+response.status+': '+detail);
+  }
+  return response;
+}
+async function createDriveBackupSnapshot(fileId){
+  const timestamp=new Date().toISOString().replace(/[:.]/g,'-');
+
+  const response=await driveRequest(
+    'https://www.googleapis.com/drive/v3/files/'+
+    encodeURIComponent(fileId)+'/copy?fields=id',
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name:'My Expense Tracker snapshot '+timestamp+'.json'
+      })
+    }
+  );
+
+  const snapshot=await response.json();
+
+  if(!snapshot.id){
+    throw new Error('Could not create a safety snapshot. The existing backup was not overwritten.');
+  }
+
+  return snapshot.id;
+}
+
+async function pruneDriveBackupSnapshots(){
+  const query=encodeURIComponent(
+    "name contains 'My Expense Tracker snapshot' and trashed=false"
+  );
+
+  const response=await driveRequest(
+    'https://www.googleapis.com/drive/v3/files?q='+query+
+    '&spaces=drive&orderBy=modifiedTime%20desc'+
+    '&pageSize=100&fields=files(id,name,modifiedTime)'
+  );
+
+  const data=await response.json();
+  const snapshots=data.files||[];
+
+  for(const oldFile of snapshots.slice(10)){
+    await driveRequest(
+      'https://www.googleapis.com/drive/v3/files/'+
+      encodeURIComponent(oldFile.id),
+      {method:'DELETE'}
+    );
+  }
+}
+function mergeDriveData(local,remote){
+  const deletedExpenses=new Set([
+    ...(local.deletedExpenseIds||[]),
+    ...(remote.deletedExpenseIds||[])
+  ]);
+  const deletedCategories=new Set([
+    ...(local.deletedCategoryIds||[]),
+    ...(remote.deletedCategoryIds||[])
+  ]);
+
+  function mergeItems(a,b,deleted){
+    const map=new Map();
+    [...(a||[]),...(b||[])].forEach(item=>{
+      if(!item||!item.id||deleted.has(item.id))return;
+      const old=map.get(item.id);
+      const time=x=>Number(x.updatedAt||x.createdAt||0);
+      if(!old||time(item)>=time(old))map.set(item.id,item);
+    });
+    return [...map.values()];
+  }
+
+  return {
+    version:1,
+    categories:mergeItems(local.categories,remote.categories,deletedCategories),
+    expenses:mergeItems(local.expenses,remote.expenses,deletedExpenses),
+    deletedExpenseIds:[...deletedExpenses],
+    deletedCategoryIds:[...deletedCategories]
+  };
+}
+
+function scheduleCloudSync(delay=1800){
+  if(!localStorage.getItem(CLOUD_CODE_KEY))return;
+
+  clearTimeout(cloudSyncTimer);
+
+  cloudSyncTimer=setTimeout(()=>{
+    syncSupabase();
+  },delay);
+}
+
+async function cloudRequest(functionName,payload){
+  const response=await fetch(
+    SUPABASE_URL+'/rest/v1/rpc/'+functionName,
+    {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_ANON_KEY,
+      },
+      body:JSON.stringify(payload)
+    }
+  );
+
+  if(!response.ok){
+    const message=await response.text();
+    throw new Error(
+      'Cloud request failed ('+response.status+'). '+message.slice(0,250)
+    );
+  }
+
+  return response.json();
+}
+
+
+async function syncSupabase(){
+  if(cloudSyncInProgress){
+    cloudSyncQueued=true;
+    return;
+  }
+
+  if(dataReadOnly){
+    setCloudStatus('Sync paused to protect your saved data.');
+    return;
+  }
+
+  const code=localStorage.getItem(CLOUD_CODE_KEY);
+
+  if(!code){
+    setCloudStatus('Enter and verify your private sync code first.');
+    return;
+  }
+
+  if(!navigator.onLine){
+    setCloudStatus('Offline. Your expenses remain saved on this device.');
+    return;
+  }
+
+  cloudSyncInProgress=true;
+  cloudSyncQueued=false;
+
+  setCloudStatus('Synchronizing and protecting your expenses…');
+
+  try{
+    // Read cloud data before making any changes.
+    const remoteResult=await cloudRequest(
+      'get_expense_tracker_data',
+      {p_code:code}
+    );
+
+    if(!remoteResult||remoteResult.ok!==true){
+      throw new Error('Private sync code is invalid. Verify it again.');
+    }
+
+    const cloudPayload=remoteResult.data;
+
+    if(!cloudPayload||typeof cloudPayload!=='object'){
+      throw new Error('Cloud backup is empty or invalid. Local data was not changed.');
+    }
+
+    let remote;
+
+    // Decrypt new-format cloud backups.
+    if(cloudPayload.__expense_tracker_encrypted===true){
+      remote=await decryptCloudData(cloudPayload,code);
+    }else{
+      // Accept the existing legacy plaintext backup for migration.
+      if(
+        !Array.isArray(cloudPayload.categories)||
+        !Array.isArray(cloudPayload.expenses)
+      ){
+        throw new Error('Cloud backup format is invalid. Local data was not changed.');
+      }
+
+      remote=cloudPayload;
+    }
+
+    // Validate local data before merging.
+    if(
+      !state||
+      !Array.isArray(state.categories)||
+      !Array.isArray(state.expenses)
+    ){
+      throw new Error('Local expense data failed validation. Nothing was uploaded.');
+    }
+
+    // Merge local and cloud records without discarding either side.
+    const merged=mergeDriveData(state,remote);
+
+    if(
+      !Array.isArray(merged.categories)||
+      !Array.isArray(merged.expenses)
+    ){
+      throw new Error('Merged data failed validation. Nothing was uploaded.');
+    }
+
+    // Encrypt before changing the cloud backup.
+    const encryptedPayload=await encryptCloudData(
+      {
+        version:1,
+        categories:merged.categories,
+        expenses:merged.expenses,
+        deletedExpenseIds:merged.deletedExpenseIds||[],
+        deletedCategoryIds:merged.deletedCategoryIds||[]
+      },
+      code
+    );
+
+    // Save locally with rollback protection.
+    const previousState=state;
+    state=merged;
+
+    try{
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      localStorage.setItem(DRIVE_PENDING_KEY,'1');
+    }catch(storageError){
+      state=previousState;
+      throw new Error('Could not safely save merged data on this device.');
+    }
+
+    if(typeof render==='function'){
+      render();
+    }
+
+    // Upload encrypted data only.
+       const saveResult=await cloudRequest(
+      'save_expense_tracker_data',
+      {
+        p_code:code,
+        p_data:encryptedPayload
+      }
+    );
+
+    if(saveResult!==true){
+      throw new Error('Cloud server did not confirm the backup. Please retry.');
+    }
+
+    const now=new Date();
+
+    setCloudStatus(
+      'Secure cloud backup successful · '+now.toLocaleString()
+    );
+
+    localStorage.setItem(
+      STORAGE_KEY+'_cloud_last_sync',
+      now.toISOString()
+    );
+
+  }catch(error){
+    console.error('Supabase secure sync failed:',error);
+
+    setCloudStatus(
+      'Cloud sync failed. Your device data remains saved. '+error.message
+    );
+
+  }finally{
+    cloudSyncInProgress=false;
+
+    if(cloudSyncQueued){
+      cloudSyncQueued=false;
+      scheduleCloudSync(500);
+    }
+  }
+}
+
+
+window.syncSupabase=syncSupabase;
+
+async function syncGoogleDrive(){
+  if(driveSyncInProgress)return;
+     if(dataReadOnly){
+    setDriveStatus('Sync paused. Saved data needs recovery before syncing.');
+    return;
+  }
+ if(!googleAccessToken){
+  setDriveStatus('Connect Google Drive before syncing.');
+  return;
+}
+
+if(
+  !googleTokenExpiresAt||
+  Date.now()>=googleTokenExpiresAt-60000
+){
+  googleAccessToken=null;
+  googleTokenExpiresAt=0;
+
+  const btn=document.getElementById('driveSyncBtn');
+  if(btn)btn.disabled=true;
+
+  setDriveStatus(
+    'Google authorization expired. Tap Connect Google Drive again.'
+  );
+  return;
+}
+  if(!navigator.onLine){
+    setDriveStatus('Offline. Your changes remain saved on this device.');
+    return;
+  }
+
+  driveSyncInProgress=true;
+  const syncBtn=document.getElementById('driveSyncBtn');
+  if(syncBtn)syncBtn.disabled=true;
+
+  try{
+    setDriveStatus('Checking your Google Drive backup…');
+
+    const fileName='My Expense Tracker backup.json';
+    const query=encodeURIComponent(
+      "name='"+fileName+"' and trashed=false"
+    );
+    const listResponse=await driveRequest(
+      'https://www.googleapis.com/drive/v3/files?q='+query+
+'&spaces=drive&orderBy=modifiedTime%20desc'+
+'&pageSize=100&fields=files(id,name,modifiedTime)'
+    );
+    const listData=await listResponse.json();
+    let file=(listData.files||[])[0]||null;
+
+    let remote={
+      version:1,categories:[],expenses:[],
+      deletedExpenseIds:[],deletedCategoryIds:[]
+    };
+
+    if(file){
+      driveBackupFileId=file.id;
+      const remoteResponse=await driveRequest(
+        'https://www.googleapis.com/drive/v3/files/'+
+        encodeURIComponent(file.id)+'?alt=media'
+      );
+      const data=await remoteResponse.json();
+
+      if(!data||!Array.isArray(data.categories)||
+         !Array.isArray(data.expenses)){
+        throw new Error('The Drive backup format is invalid. Your device data was not replaced.');
+      }
+      remote=data;
+    }
+const local={
+  ...state,
+  deletedExpenseIds:state.deletedExpenseIds||[],
+  deletedCategoryIds:state.deletedCategoryIds||[]
+};
+const merged=mergeDriveData(local,remote);
+
+// Keep the current in-memory data safe until the merged data is saved.
+const previousState=state;
+state=merged;
+
+if(!save()){
+  state=previousState;
+
+  if(typeof render==='function'){
+    render();
+  }
+
+  throw new Error(
+    'Could not save the merged data on this device. Previous data has been restored.'
+  );
+}
+    const backup={
+      app:'My Expense Tracker',
+      version:1,
+      exportedAt:new Date().toISOString(),
+      categories:state.categories,
+      expenses:state.expenses,
+      deletedExpenseIds:state.deletedExpenseIds,
+      deletedCategoryIds:state.deletedCategoryIds
+    };
+
+    
+const body=JSON.stringify(backup);
+
+    if(file){
+      setDriveStatus('Creating a safety snapshot of your previous backup…');
+      await createDriveBackupSnapshot(file.id);
+
+      setDriveStatus('Updating your Google Drive backup…');
+
+      await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files/'+
+        encodeURIComponent(file.id)+'?uploadType=media',
+        {
+          method:'PATCH',
+          headers:{'Content-Type':'application/json'},
+          body
+        }
+      );
+    }else{
+      const boundary='expense_tracker_'+Date.now();
+
+      const metadata={
+        name:fileName,
+        mimeType:'application/json'
+      };
+
+      const multipartBody=
+        '--'+boundary+'\r\n'+
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n'+
+        JSON.stringify(metadata)+'\r\n'+
+        '--'+boundary+'\r\n'+
+        'Content-Type: application/json\r\n\r\n'+
+        body+'\r\n'+
+        '--'+boundary+'--';
+
+      const createResponse=await driveRequest(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+        {
+          method:'POST',
+          headers:{
+            'Content-Type':'multipart/related; boundary='+boundary
+          },
+          body:multipartBody
+        }
+      );
+
+      const created=await createResponse.json();
+
+      if(!created.id){
+        throw new Error('Google Drive did not return a backup file ID.');
+      }
+
+      driveBackupFileId=created.id;
+    }
+         try{
+      await pruneDriveBackupSnapshots();
+    }catch(snapshotCleanupError){
+      console.warn(
+        'Old backup snapshot cleanup failed:',
+        snapshotCleanupError
+      );
+    }
+    const syncTime=new Date().toISOString();
+
+localStorage.setItem(DRIVE_LAST_SYNC_KEY,syncTime);
+localStorage.setItem(DRIVE_PENDING_KEY,'0');
+
+const now=new Date(syncTime).toLocaleString();
+
+setDriveStatus('Google Drive connected · Backup is up to date');
+setDriveLastSync('Last successful sync: '+now);
+    if(typeof render==='function')render();
+
+  }catch(error){
+    console.error('Drive sync failed:',error);
+    if(String(error.message).includes('401')){
+      googleAccessToken=null;
+      setDriveStatus('Authorization expired. Tap Connect Google Drive again.');
+    }else{
+      setDriveStatus('Sync failed. Your device data is still saved.');
+      setDriveLastSync(error.message);
+    }
+  }finally{
+    driveSyncInProgress=false;
+    if(syncBtn)syncBtn.disabled=!googleAccessToken;
+  }
+}
+      window.syncGoogleDrive = syncGoogleDrive;
+function save(){
+  if(dataReadOnly){
+    announce(
+      'Saving is disabled because the original saved data could not be safely recovered. Export or recover your data before making changes.',
+      'error'
+    );
+    return false;
+  }
+
+  try{
+    // Mark backup as pending before writing the latest device data.
+    localStorage.setItem(DRIVE_PENDING_KEY,'1');
+
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+scheduleCloudSync();
+    if(googleAccessToken&&navigator.onLine&&!driveSyncInProgress){
+      clearTimeout(driveSyncTimer);
+
+      driveSyncTimer=setTimeout(()=>{
+        syncGoogleDrive();
+      },2000);
+    }else{
+      setDriveStatus(
+        navigator.onLine
+          ? 'Saved on this device · Connect Google Drive to back up'
+          : 'Saved on this device · Backup waiting for internet'
+      );
+    }
+
+    return true;
+
+  }catch(e){
+    console.error('Local save failed:',e);
+    toast('Could not save safely. Check device storage and try again.');
+    return false;
+  }
+}
+function commitState(changeFunction, successMessage){
+  let previousState;
+
+  try{
+    previousState = JSON.stringify(state);
+
+    changeFunction();
+
+    if(!save()){
+      state = JSON.parse(previousState);
+      render();
+
+      announce(
+        'Could not save this change. Your previous saved data has been restored. Check device storage and try again.',
+        'error'
+      );
+
+      return false;
+    }
+
+    render();
+    toast(successMessage);
+    return true;
+
+  }catch(error){
+    console.error('State update failed:', error);
+
+    if(previousState){
+      try{
+        state = JSON.parse(previousState);
+        render();
+      }catch(restoreError){
+        console.error('State rollback failed:', restoreError);
+      }
+    }
+
+    announce(
+      'The change could not be completed. Your previous data has been restored where possible.',
+      'error'
+    );
+
+    return false;
+  }
+}
+function load(){
+  const RECOVERY_KEY=STORAGE_KEY+'_recovery';
+
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+
+    if(!raw)return;
+
+    const parsed=JSON.parse(raw);
+
+    if(
+      !parsed ||
+      typeof parsed!=='object' ||
+      !Array.isArray(parsed.categories) ||
+      !Array.isArray(parsed.expenses)
+    ){
+      dataReadOnly=true;
+
+      announce(
+        'Saved data has an unexpected format. Editing is disabled to protect the original data.',
+        'error'
+      );
+      return;
+    }
+
+    const validCategories=parsed.categories.filter(c=>
+      c &&
+      typeof c.id==='string' &&
+      c.id.trim() &&
+      typeof c.name==='string' &&
+      c.name.trim()
+    );
+
+    const validExpenses=parsed.expenses.filter(x=>{
+      if(
+        !x ||
+        typeof x.id!=='string' ||
+        !x.id.trim() ||
+        !Number.isFinite(Number(x.amount)) ||
+        Number(x.amount)<=0 ||
+        typeof x.date!=='string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(x.date)
+      ){
+        return false;
+      }
+
+      const date=new Date(x.date+'T12:00:00');
+
+      return !isNaN(date.getTime()) &&
+        date.toISOString().slice(0,10)===x.date;
+    });
+
+    const hasInvalidRecords=
+      validCategories.length!==parsed.categories.length ||
+      validExpenses.length!==parsed.expenses.length;
+
+    if(hasInvalidRecords){
+      let recoverySaved=false;
+
+      try{
+        let recoveryKey=RECOVERY_KEY;
+
+        const existingRecovery=localStorage.getItem(recoveryKey);
+
+        if(existingRecovery && existingRecovery!==raw){
+          recoveryKey=RECOVERY_KEY+'_'+Date.now();
+        }
+
+        if(localStorage.getItem(recoveryKey)!==raw){
+          localStorage.setItem(recoveryKey,raw);
+        }
+
+        recoverySaved=localStorage.getItem(recoveryKey)===raw;
+
+      }catch(recoveryError){
+        console.error('Recovery copy could not be created:',recoveryError);
+      }
+
+      if(!recoverySaved){
+        dataReadOnly=true;
+
+        announce(
+          'Some saved records are invalid and a recovery copy could not be verified. Editing is disabled to protect your original data.',
+          'error'
+        );
+        return;
+      }
+
+      announce(
+        'Some saved records need checking. A recovery copy was successfully preserved before loading valid records.',
+        'warning'
+      );
+    }
+
+    state={
+      version:1,
+      categories:validCategories,
+      expenses:validExpenses,
+      deletedExpenseIds:Array.isArray(parsed.deletedExpenseIds)
+        ? parsed.deletedExpenseIds.filter(id=>typeof id==='string')
+        : [],
+      deletedCategoryIds:Array.isArray(parsed.deletedCategoryIds)
+        ? parsed.deletedCategoryIds.filter(id=>typeof id==='string')
+        : []
+    };
+
+  }catch(error){
+    console.error('Saved data loading failed:',error);
+
+    dataReadOnly=true;
+
+    announce(
+      'Saved data could not be read. Editing is disabled to protect the original data. Do not clear browser data.',
+      'error'
+    );
+  }
+}
 function selectedMonth(){return $('monthFilter').value||currentMonth()}
 function category(id){return state.categories.find(c=>c.id===id)||{id:'uncategorized',name:'Uncategorized',emoji:'📌'}}
 function allForMonth(){return state.expenses.filter(e=>String(e.date||'').slice(0,7)===selectedMonth())}
@@ -189,26 +1606,357 @@ function renderHistory(){const q=$('searchExpenses').value.trim().toLowerCase(),
 function renderReports(){const items=allForMonth(),cats=categoryTotals(items),sum=total(items);$('reportMonth').textContent=new Date(selectedMonth()+'-15T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});$('reportTotal').textContent=money(sum);$('reportCaption').textContent=items.length+' expenses · '+(sum? 'Largest category: '+(cats[0]?.cat.name||'—'):'No spending recorded this month');const max=cats[0]?.amount||1;$('reportBars').innerHTML=cats.map(x=>`<div class="report-row"><div class="cat-name">${esc(x.cat.emoji||'📌')} ${esc(x.cat.name)}</div><div class="report-track"><span style="width:${x.amount/max*100}%"></span></div><div class="report-value">${money(x.amount)}</div></div>`).join('')||'<p class="settings-note">Add expenses to see your category breakdown.</p>';$('reportCategories').innerHTML=cats.map(x=>`<div class="expense"><div class="cat-icon">${esc(x.cat.emoji||'📌')}</div><div class="exp-main"><div class="exp-title">${esc(x.cat.name)}</div><div class="exp-sub">${sum?Math.round(x.amount/sum*100):0}% of monthly spending</div></div><div class="exp-amount">${money(x.amount)}</div></div>`).join('')||empty('No report yet','Your spending summary will appear here.')}
 function renderCategories(){$('categoryManager').innerHTML=state.categories.map(c=>`<div class="category-manage"><div class="cat-icon">${esc(c.emoji||'📌')}</div><div class="cat-name">${esc(c.name)}</div><button class="tiny" onclick="editCategory('${esc(c.id)}')">Rename</button><button class="danger" onclick="deleteCategory('${esc(c.id)}')">Remove</button></div>`).join('')||empty('No categories','Add a category to start tracking.')}
 function render(){fillCategorySelects();renderDashboard();renderHistory();renderReports();renderCategories()}
-window.showPage=function(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(name+'Page').classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('fab').classList.toggle('hidden',name==='categories'||name==='backup');if(name==='backup')document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));window.scrollTo({top:0,behavior:'smooth'});render()};
+window.showPage=function(name){
+  const page=document.getElementById(name+'Page');
+
+  if(!page){
+    announce('This page is not available. Please try again.','error');
+    return;
+  }
+
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
+
+  page.classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(button=>{
+    button.classList.toggle('active',button.dataset.page===name);
+  });
+
+  $('fab').classList.toggle(
+    'hidden',
+    name==='categories'||name==='backup'
+  );
+
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+};
 function openModal(id){$(id).classList.add('open');setTimeout(()=>{const input=$(id).querySelector('input:not([type=hidden]),select');if(input)input.focus({preventScroll:true})},100)}
 window.closeModal=id=>$(id).classList.remove('open');
 window.openExpense=function(id){$('expenseForm').reset();$('expenseId').value='';$('expenseModalTitle').textContent='Add expense';$('saveExpenseBtn').textContent='Save expense';$('expenseDate').value=today();fillCategorySelects();if(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;$('expenseId').value=e.id;$('amount').value=e.amount;$('expenseCategory').value=e.categoryId;$('expenseDate').value=e.date;$('expenseNote').value=e.note||'';$('expenseModalTitle').textContent='Edit expense';$('saveExpenseBtn').textContent='Update expense'}openModal('expenseModal')};
 window.editExpense=id=>openExpense(id);
-window.deleteExpense=function(id){const e=state.expenses.find(x=>x.id===id);if(!e)return;if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;state.expenses=state.expenses.filter(x=>x.id!==id);save();render();toast('Expense deleted')};
-$('expenseForm').addEventListener('submit',e=>{e.preventDefault();const amount=Number($('amount').value),date=$('expenseDate').value,categoryId=$('expenseCategory').value,note=$('expenseNote').value.trim(),id=$('expenseId').value;if(!Number.isFinite(amount)||amount<=0){toast('Enter an amount greater than ₹0');$('amount').focus();return}if(amount>999999999){toast('Amount is too large');return}if(!date||date.length!==10){toast('Choose a valid date');return}if(!categoryId||!state.categories.some(c=>c.id===categoryId)){toast('Choose a valid category');return}if(note.length>250){toast('Note must be 250 characters or fewer');return}if(id){const index=state.expenses.findIndex(x=>x.id===id);if(index<0){toast('Expense not found');return}state.expenses[index]={...state.expenses[index],amount,date,categoryId,note,updatedAt:Date.now()}}else state.expenses.push({id:uid(),amount,date,categoryId,note,createdAt:Date.now()});const ok=save();closeModal('expenseModal');render();toast(id?'Expense updated':'Expense saved');if(!ok)announce('The change may not have been saved. Export or check browser storage.','error')});
+window.deleteExpense=function(id){
+  const e=state.expenses.find(x=>x.id===id);
+  if(!e)return;
+
+  if(!confirm('Delete this expense of '+money(e.amount)+'? This cannot be undone unless you have a backup.'))return;
+
+  commitState(()=>{
+    state.deletedExpenseIds=state.deletedExpenseIds||[];
+    if(!state.deletedExpenseIds.includes(id)){
+      state.deletedExpenseIds.push(id);
+    }
+    state.expenses=state.expenses.filter(x=>x.id!==id);
+  },'Expense deleted');
+};
+$('expenseForm').addEventListener('submit',e=>{
+  e.preventDefault();
+
+  const amount=Number($('amount').value);
+  const date=$('expenseDate').value;
+  const categoryId=$('expenseCategory').value;
+  const note=$('expenseNote').value.trim();
+  const id=$('expenseId').value;
+
+  if(!Number.isFinite(amount)||amount<=0){
+    toast('Enter an amount greater than ₹0');
+    $('amount').focus();
+    return;
+  }
+
+  if(amount>999999999){
+    toast('Amount is too large');
+    return;
+  }
+
+  if(!date||! /^\d{4}-\d{2}-\d{2}$/.test(date)||
+     new Date(date+'T12:00:00').toISOString().slice(0,10)!==date){
+    toast('Choose a valid date');
+    return;
+  }
+
+  if(!categoryId||!state.categories.some(c=>c.id===categoryId)){
+    toast('Choose a valid category');
+    return;
+  }
+
+  if(note.length>250){
+    toast('Note must be 250 characters or fewer');
+    return;
+  }
+
+  const success=commitState(()=>{
+    if(id){
+      const index=state.expenses.findIndex(x=>x.id===id);
+      if(index<0)throw new Error('Expense not found');
+
+      state.expenses[index]={
+        ...state.expenses[index],
+        amount,date,categoryId,note,
+        updatedAt:Date.now()
+      };
+    }else{
+      state.expenses.push({
+        id:uid(),amount,date,categoryId,note,
+        createdAt:Date.now()
+      });
+    }
+  },id?'Expense updated':'Expense saved');
+
+  if(success)closeModal('expenseModal');
+});
 window.openCategory=function(id){$('categoryForm').reset();$('categoryId').value='';$('categoryModalTitle').textContent='Add category';if(id){const c=state.categories.find(x=>x.id===id);if(!c)return;$('categoryId').value=id;$('categoryName').value=c.name;$('categoryEmoji').value=c.emoji||'';$('categoryModalTitle').textContent='Rename category'}openModal('categoryModal')};
 window.editCategory=id=>openCategory(id);
-$('categoryForm').addEventListener('submit',e=>{e.preventDefault();const name=$('categoryName').value.trim(),emoji=$('categoryEmoji').value.trim()||'📌',id=$('categoryId').value;if(!name){toast('Enter a category name');return}if(state.categories.some(c=>c.name.toLowerCase()===name.toLowerCase()&&c.id!==id)){toast('That category already exists');return}if(id){const c=state.categories.find(x=>x.id===id);if(!c){toast('Category not found');return}c.name=name;c.emoji=emoji}else state.categories.push({id:uid(),name,emoji});save();closeModal('categoryModal');render();toast(id?'Category renamed':'Category added')});
-window.deleteCategory=function(id){const c=state.categories.find(x=>x.id===id);if(!c)return;const used=state.expenses.some(e=>e.categoryId===id);if(!confirm('Remove “'+c.name+'”? '+(used?'Existing expenses will remain and show as Uncategorized.':'This category will be removed.')))return;state.categories=state.categories.filter(x=>x.id!==id);if(used)state.expenses=state.expenses.map(e=>e.categoryId===id?{...e,categoryId:'uncategorized'}:e);save();render();toast('Category removed')};
+$('categoryForm').addEventListener('submit',e=>{
+  e.preventDefault();
+
+  const name=$('categoryName').value.trim();
+  const emoji=$('categoryEmoji').value.trim()||'📌';
+  const id=$('categoryId').value;
+
+  if(!name){
+    toast('Enter a category name');
+    return;
+  }
+
+  if(name.length>35){
+    toast('Category name must be 35 characters or fewer');
+    return;
+  }
+
+  if(state.categories.some(c=>
+    c.name.toLowerCase()===name.toLowerCase()&&c.id!==id
+  )){
+    toast('That category already exists');
+    return;
+  }
+
+  const success=commitState(()=>{
+    if(id){
+      const c=state.categories.find(x=>x.id===id);
+      if(!c)throw new Error('Category not found');
+
+      c.name=name;
+      c.emoji=emoji;
+      c.updatedAt=Date.now();
+    }else{
+      state.categories.push({
+        id:uid(),
+        name,
+        emoji,
+        createdAt:Date.now(),
+        updatedAt:Date.now()
+      });
+    }
+  },id?'Category renamed':'Category added');
+
+  if(success)closeModal('categoryModal');
+});
+window.deleteCategory=function(id){
+  const c=state.categories.find(x=>x.id===id);
+  if(!c)return;
+
+  const used=state.expenses.some(e=>e.categoryId===id);
+
+  if(!confirm('Remove "'+c.name+'"? '+(
+    used
+      ?'Existing expenses will remain and show as Uncategorized.'
+      :'This category will be removed.'
+  )))return;
+
+  commitState(()=>{
+    state.deletedCategoryIds=state.deletedCategoryIds||[];
+
+    if(!state.deletedCategoryIds.includes(id)){
+      state.deletedCategoryIds.push(id);
+    }
+
+    state.categories=state.categories.filter(x=>x.id!==id);
+
+    if(used){
+      state.expenses=state.expenses.map(e=>
+        e.categoryId===id
+          ?{...e,categoryId:'uncategorized',updatedAt:Date.now()}
+          :e
+      );
+    }
+  },'Category removed');
+};
 $('monthFilter').value=currentMonth();$('monthFilter').addEventListener('change',()=>{if(!$('monthFilter').value)$('monthFilter').value=currentMonth();render()});['searchExpenses','historyCategory','historySort'].forEach(id=>$(id).addEventListener(id==='searchExpenses'?'input':'change',renderHistory));
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-window.exportBackup=function(){const payload={app:'My Expense Tracker',version:1,exportedAt:new Date().toISOString(),categories:state.categories,expenses:state.expenses};download('expense-tracker-backup-'+today()+'.json',JSON.stringify(payload,null,2),'application/json');toast('Backup export started')};
+window.exportBackup=function(){
+   if(document.visibilityState==='visible'){
+  scheduleCloudSync(500);
+}
+  const payload={
+    app:'My Expense Tracker',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    categories:state.categories,
+    expenses:state.expenses,
+    deletedExpenseIds:state.deletedExpenseIds||[],
+    deletedCategoryIds:state.deletedCategoryIds||[]
+  };
+
+  download(
+    'expense-tracker-backup-'+today()+'.json',
+    JSON.stringify(payload,null,2),
+    'application/json'
+  );
+
+  toast('Backup export started');
+};
 window.exportCSV=function(){const rows=[['Date','Amount INR','Category','Note'],...state.expenses.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(e=>[e.date,Number(e.amount).toFixed(2),category(e.categoryId).name,e.note||''])];const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('expenses-'+today()+'.csv','\ufeff'+csv,'text/csv;charset=utf-8');toast('CSV export started')};
-$('importFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses))throw new Error('This file is not a valid expense tracker backup.');if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;const categories=parsed.categories.filter(c=>c&&typeof c.id==='string'&&typeof c.name==='string').map(c=>({id:c.id,name:c.name,emoji:String(c.emoji||'📌')}));const expenses=parsed.expenses.filter(x=>x&&typeof x.id==='string'&&Number.isFinite(Number(x.amount))&&Number(x.amount)>0&&typeof x.date==='string').map(x=>({id:x.id,amount:Number(x.amount),date:x.date,categoryId:String(x.categoryId||'uncategorized'),note:String(x.note||'').slice(0,250),createdAt:Number(x.createdAt)||Date.now()}));if(!categories.length)throw new Error('Backup contains no valid categories.');state={version:1,categories,expenses};if(!save())throw new Error('Could not save restored data on this device.');render();toast('Backup restored successfully');announce('Your backup has been restored.','success')}catch(err){toast(err.message||'Could not restore this backup');announce(err.message||'Backup restore failed.','error')}finally{e.target.value=''}});
-window.clearAllData=function(){if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;state.expenses=[];save();render();toast('All expense records deleted')};
+$('importFile').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+
+  try{
+    const parsed=JSON.parse(await file.text());
+
+    if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses)){
+      throw new Error('This file is not a valid expense tracker backup.');
+    }
+
+    if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;
+
+    const categories=parsed.categories
+      .filter(c=>
+        c&&typeof c.id==='string'&&c.id.trim()&&
+        typeof c.name==='string'&&c.name.trim()
+      )
+      .map(c=>({
+        id:c.id,
+        name:c.name.trim(),
+        emoji:String(c.emoji||'📌').slice(0,12),
+        createdAt:Number(c.createdAt)||Date.now(),
+        updatedAt:Number(c.updatedAt)||Number(c.createdAt)||Date.now()
+      }));
+
+    const expenses=parsed.expenses
+      .filter(x=>{
+        if(!x||typeof x.id!=='string'||!x.id.trim())return false;
+
+        const amount=Number(x.amount);
+        const date=x.date;
+        const parsedDate=new Date(String(date)+'T12:00:00');
+
+        return Number.isFinite(amount)&&amount>0&&amount<=999999999&&
+          typeof date==='string'&&
+          /^\d{4}-\d{2}-\d{2}$/.test(date)&&
+          !isNaN(parsedDate.getTime())&&
+          parsedDate.toISOString().slice(0,10)===date;
+      })
+      .map(x=>({
+        id:x.id,
+        amount:Number(x.amount),
+        date:x.date,
+        categoryId:String(x.categoryId||'uncategorized'),
+        note:String(x.note||'').slice(0,250),
+        createdAt:Number(x.createdAt)||Date.now(),
+        updatedAt:Number(x.updatedAt)||Number(x.createdAt)||Date.now()
+      }));
+
+    if(!categories.length){
+      throw new Error('Backup contains no valid categories.');
+    }
+
+    const importedExpenseIds=new Set(expenses.map(x=>x.id));
+    const importedCategoryIds=new Set(categories.map(x=>x.id));
+
+    const deletedExpenseIds=[...new Set([
+      ...(Array.isArray(parsed.deletedExpenseIds)?parsed.deletedExpenseIds:[]),
+      ...(state.deletedExpenseIds||[]),
+      ...state.expenses.filter(x=>!importedExpenseIds.has(x.id)).map(x=>x.id)
+    ])].filter(id=>typeof id==='string'&&!importedExpenseIds.has(id));
+
+    const deletedCategoryIds=[...new Set([
+      ...(Array.isArray(parsed.deletedCategoryIds)?parsed.deletedCategoryIds:[]),
+      ...(state.deletedCategoryIds||[]),
+      ...state.categories.filter(x=>!importedCategoryIds.has(x.id)).map(x=>x.id)
+    ])].filter(id=>typeof id==='string'&&!importedCategoryIds.has(id));
+
+    const success=commitState(()=>{
+      state={
+        version:1,
+        categories,
+        expenses,
+        deletedExpenseIds,
+        deletedCategoryIds
+      };
+    },'Backup restored successfully');
+
+    if(success){
+      announce('Your backup has been restored.','success');
+    }
+
+  }catch(err){
+    console.error('Backup restore failed:',err);
+    toast(err.message||'Could not restore this backup');
+    announce(err.message||'Backup restore failed.','error');
+  }finally{
+    e.target.value='';
+  }
+});
+window.clearAllData=function(){
+  if(!confirm('Delete ALL expense records? Categories will be kept. This cannot be undone unless you have exported a backup.'))return;
+
+  commitState(()=>{
+    state.deletedExpenseIds=state.deletedExpenseIds||[];
+
+    state.expenses.forEach(expense=>{
+      if(!state.deletedExpenseIds.includes(expense.id)){
+        state.deletedExpenseIds.push(expense.id);
+      }
+    });
+
+    state.expenses=[];
+  },'All expense records deleted');
+};
 document.querySelectorAll('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click',e=>{if(e.target===backdrop)backdrop.classList.remove('open')}));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'))});
 load();render();
+      if(localStorage.getItem(CLOUD_CODE_KEY)){
+  scheduleCloudSync(500);
+}
+if(localStorage.getItem(DRIVE_PENDING_KEY)==='1'){
+  setDriveStatus(
+    'Backup pending · Connect Google Drive to protect your latest changes'
+  );
+}
+
+const previousSync=localStorage.getItem(DRIVE_LAST_SYNC_KEY);
+
+if(previousSync){
+  setDriveLastSync(
+    'Last successful sync: '+new Date(previousSync).toLocaleString()
+  );
+}
+ // Resume Drive sync when the app comes back online
+window.addEventListener('online',()=>{
+   scheduleCloudSync(500);
+  if(googleAccessToken){
+    setDriveStatus('Internet restored. Syncing…');
+    syncGoogleDrive();
+  }else{
+    setDriveStatus('Internet restored. Connect Google Drive to sync.');
+  }
+});
+
+// Sync when the app returns to the foreground
+document.addEventListener('visibilitychange',()=>{
+   if(document.visibilityState==='visible'){
+  scheduleCloudSync(500);
+}
+  if(
+    document.visibilityState==='visible'&&
+    navigator.onLine&&
+    googleAccessToken
+  ){
+    syncGoogleDrive();
+  }
+});
  // Quick-entry deep link
 if (new URLSearchParams(window.location.search).get('quick') === '1') {
   setTimeout(() => window.openExpense(), 250);
@@ -217,6 +1965,33 @@ if (new URLSearchParams(window.location.search).get('quick') === '1') {
 </script>
 
 <script>
+   // Reliable Google Drive button click handlers
+(function () {
+  const connectBtn = document.getElementById('driveConnectBtn');
+  const syncBtn = document.getElementById('driveSyncBtn');
+  const status = document.getElementById('driveStatus');
+
+  if (connectBtn) {
+    connectBtn.addEventListener('click', function () {
+      if (typeof window.connectGoogleDrive === 'function') {
+        if (status) status.textContent = 'Connect button tapped. Starting Google authorization…';
+        window.connectGoogleDrive();
+      } else {
+        if (status) status.textContent = 'App initialization error. Please reload the app.';
+      }
+    });
+  }
+
+  if (syncBtn) {
+    syncBtn.addEventListener('click', function () {
+      if (typeof window.syncGoogleDrive === 'function') {
+        window.syncGoogleDrive();
+      } else {
+        if (status) status.textContent = 'Sync function unavailable. Please reload the app.';
+      }
+    });
+  }
+})();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
