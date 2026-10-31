@@ -399,6 +399,68 @@ textarea:focus-visible {
   padding-left: 1px;
   padding-right: 1px;
 }
+   /* Mobile horizontal overflow protection */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app,
+.page,
+.panel,
+.card,
+.section-head,
+.category-grid,
+.category-manage,
+.expense,
+.report-row,
+.form-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.report-row .cat-name {
+  width: 108px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.report-track {
+  min-width: 0;
+}
+
+.exp-main,
+.cat-name,
+.section-head h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+img,
+video,
+iframe,
+canvas {
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  .app {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .hero {
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
+  .form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
