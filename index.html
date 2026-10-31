@@ -840,10 +840,25 @@ window.testCloudSyncCode=async function(){
       throw new Error('Incorrect private sync code. Please check and retry.');
     }
 
+        const cloudData=result.data;
+
     if(
-      !result.data ||
-      !Array.isArray(result.data.categories) ||
-      !Array.isArray(result.data.expenses)
+      !cloudData ||
+      typeof cloudData!=='object' ||
+      Array.isArray(cloudData)
+    ){
+      throw new Error('Cloud data format is invalid. No local data was changed.');
+    }
+
+    if(cloudData.__expense_tracker_encrypted===true){
+
+      // Verify that the encrypted backup can be decrypted.
+      // Do not change local expense data during this check.
+      await decryptCloudData(cloudData,code);
+
+    }else if(
+      !Array.isArray(cloudData.categories) ||
+      !Array.isArray(cloudData.expenses)
     ){
       throw new Error('Cloud data format is invalid. No local data was changed.');
     }
