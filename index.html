@@ -577,7 +577,7 @@ textarea:focus-visible {
    (function(){
 const STORAGE_KEY='myExpenseTracker_v1';  
 const SUPABASE_URL='https://lxrzpmptadzbffwiovae.supabase.co';
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXAiLCJyZWYiOiJseHJ6cG1wdGFkemJmZndpb3ZhZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkzMjg1NDMxLCJleHAiOjIxMDg4NjE0MzF9.flWIwXYsci8nJf639eZBpe-gEsOkR98E6nwu15aoTV4';
+const SUPABASE_ANON_KEY='sb_publishable_4hkB_6OBNc-GaJrwjbzvuQ__4F_fl2d';
 const CLOUD_CODE_KEY=STORAGE_KEY+'_cloud_code';
 
 const DRIVE_PENDING_KEY=STORAGE_KEY+'_drive_pending';
@@ -659,7 +659,6 @@ window.testCloudSyncCode=async function(){
         headers:{
           'Content-Type':'application/json',
           'apikey':SUPABASE_ANON_KEY,
-          'Authorization':'Bearer '+SUPABASE_ANON_KEY
         },
         body:JSON.stringify({p_code:code})
       }
