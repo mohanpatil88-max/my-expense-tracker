@@ -583,8 +583,10 @@ canvas {
    <p class="settings-note">Export a backup regularly. Browser data can be lost if you clear website data or remove the browser app. A backup file lets you restore your records.</p>
    <div class="backup-buttons"><button class="primary" onclick="exportBackup()">Export backup</button><button class="secondary" onclick="document.getElementById('importFile').click()">Restore backup</button></div>
    <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+     <input type="file" id="quickQueueFiles" accept=".jsonl,.json,application/json,text/plain" multiple class="hidden">
    <div style="margin-top:10px"><button class="ghost" style="width:100%" onclick="exportCSV()">Export expenses as CSV</button></div>
   </div>
+    
   <div class="card" style="padding:18px">
    <strong>Data management</strong><p class="settings-note">This app stores expense records in your browser on this device. It does not connect to your bank or process payments.</p>
    <button class="danger" onclick="clearAllData()">Delete all expense records</button>
