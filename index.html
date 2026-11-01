@@ -1150,109 +1150,134 @@ async function syncSupabase(){
   setCloudStatus('Synchronizing and protecting your expenses…');
 
   try{
-    // Read cloud data before making any changes.
-    const remoteResult=await cloudRequest(
-      'get_expense_tracker_data',
-      {p_code:code}
-    );
+    let completed=false;
+    let lastConflict=false;
 
-    if(!remoteResult||remoteResult.ok!==true){
-      throw new Error('Private sync code is invalid. Verify it again.');
-    }
+    // Retry if another device or the Quick Expense function
+    // updates the cloud backup while this sync is running.
+    for(let attempt=1;attempt<=3;attempt++){
 
-    const cloudPayload=remoteResult.data;
+      const remoteResult=await cloudRequest(
+        'get_expense_tracker_data',
+        {p_code:code}
+      );
 
-    if(!cloudPayload||typeof cloudPayload!=='object'){
-      throw new Error('Cloud backup is empty or invalid. Local data was not changed.');
-    }
+      if(!remoteResult||remoteResult.ok!==true){
+        throw new Error('Private sync code is invalid. Verify it again.');
+      }
 
-    let remote;
+      if(!remoteResult.updated_at){
+        throw new Error('Cloud backup timestamp is missing. Nothing was changed.');
+      }
 
-    // Decrypt new-format cloud backups.
-    if(cloudPayload.__expense_tracker_encrypted===true){
-      remote=await decryptCloudData(cloudPayload,code);
-    }else{
-      // Accept the existing legacy plaintext backup for migration.
+      const cloudPayload=remoteResult.data;
+
+      if(!cloudPayload||typeof cloudPayload!=='object'){
+        throw new Error('Cloud backup is empty or invalid. Local data was not changed.');
+      }
+
+      let remote;
+
+      if(cloudPayload.__expense_tracker_encrypted===true){
+        remote=await decryptCloudData(cloudPayload,code);
+      }else{
+        if(
+          !Array.isArray(cloudPayload.categories)||
+          !Array.isArray(cloudPayload.expenses)
+        ){
+          throw new Error('Cloud backup format is invalid. Local data was not changed.');
+        }
+
+        remote=cloudPayload;
+      }
+
       if(
-        !Array.isArray(cloudPayload.categories)||
-        !Array.isArray(cloudPayload.expenses)
+        !state||
+        !Array.isArray(state.categories)||
+        !Array.isArray(state.expenses)
       ){
-        throw new Error('Cloud backup format is invalid. Local data was not changed.');
+        throw new Error('Local expense data failed validation. Nothing was uploaded.');
       }
 
-      remote=cloudPayload;
-    }
+      const merged=mergeDriveData(state,remote);
 
-    // Validate local data before merging.
-    if(
-      !state||
-      !Array.isArray(state.categories)||
-      !Array.isArray(state.expenses)
-    ){
-      throw new Error('Local expense data failed validation. Nothing was uploaded.');
-    }
-
-    // Merge local and cloud records without discarding either side.
-    const merged=mergeDriveData(state,remote);
-
-    if(
-      !Array.isArray(merged.categories)||
-      !Array.isArray(merged.expenses)
-    ){
-      throw new Error('Merged data failed validation. Nothing was uploaded.');
-    }
-
-    // Encrypt before changing the cloud backup.
-    const encryptedPayload=await encryptCloudData(
-      {
-        version:1,
-        categories:merged.categories,
-        expenses:merged.expenses,
-        deletedExpenseIds:merged.deletedExpenseIds||[],
-        deletedCategoryIds:merged.deletedCategoryIds||[]
-      },
-      code
-    );
-
-    // Save locally with rollback protection.
-    const previousState=state;
-    state=merged;
-
-    try{
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-      localStorage.setItem(DRIVE_PENDING_KEY,'1');
-    }catch(storageError){
-      state=previousState;
-      throw new Error('Could not safely save merged data on this device.');
-    }
-
-    if(typeof render==='function'){
-      render();
-    }
-
-    // Upload encrypted data only.
-       const saveResult=await cloudRequest(
-      'save_expense_tracker_data',
-      {
-        p_code:code,
-        p_data:encryptedPayload
+      if(
+        !Array.isArray(merged.categories)||
+        !Array.isArray(merged.expenses)
+      ){
+        throw new Error('Merged data failed validation. Nothing was uploaded.');
       }
-    );
 
-    if(saveResult!==true){
+      const encryptedPayload=await encryptCloudData(
+        {
+          version:1,
+          categories:merged.categories,
+          expenses:merged.expenses,
+          deletedExpenseIds:merged.deletedExpenseIds||[],
+          deletedCategoryIds:merged.deletedCategoryIds||[]
+        },
+        code
+      );
+
+      const saveResult=await cloudRequest(
+        'save_expense_tracker_data_if_unchanged',
+        {
+          p_code:code,
+          p_data:encryptedPayload,
+          p_expected_updated_at:remoteResult.updated_at
+        }
+      );
+
+      if(saveResult&&saveResult.ok===true){
+        // Cloud save succeeded. Now update local state.
+        state=merged;
+
+        try{
+          localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+          localStorage.setItem(DRIVE_PENDING_KEY,'1');
+        }catch(storageError){
+          console.error('Local storage update failed after cloud save:',storageError);
+          throw new Error('Cloud backup succeeded, but local storage could not be updated. Please reopen the app and sync again.');
+        }
+
+        if(typeof render==='function'){
+          render();
+        }
+
+        const now=new Date();
+
+        setCloudStatus(
+          'Secure cloud backup successful · '+now.toLocaleString()
+        );
+
+        localStorage.setItem(
+          STORAGE_KEY+'_cloud_last_sync',
+          now.toISOString()
+        );
+
+        completed=true;
+        break;
+      }
+
+      if(saveResult&&saveResult.error==='conflict'){
+        lastConflict=true;
+        continue;
+      }
+
+      if(saveResult&&saveResult.error==='invalid_code'){
+        throw new Error('Private sync code is invalid. Verify it again.');
+      }
+
       throw new Error('Cloud server did not confirm the backup. Please retry.');
     }
 
-    const now=new Date();
+    if(!completed&&lastConflict){
+      throw new Error('Cloud data changed repeatedly during sync. No cloud changes were overwritten. Please try again.');
+    }
 
-    setCloudStatus(
-      'Secure cloud backup successful · '+now.toLocaleString()
-    );
-
-    localStorage.setItem(
-      STORAGE_KEY+'_cloud_last_sync',
-      now.toISOString()
-    );
+    if(!completed){
+      throw new Error('Cloud backup could not be completed. Please retry.');
+    }
 
   }catch(error){
     console.error('Supabase secure sync failed:',error);
@@ -1271,7 +1296,7 @@ async function syncSupabase(){
   }
 }
 
-
+      
 window.syncSupabase=syncSupabase;
 
 async function syncGoogleDrive(){
