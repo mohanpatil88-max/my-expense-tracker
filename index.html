@@ -529,8 +529,21 @@ canvas {
  <div id="notice" class="notice" role="status"></div>
  <section id="dashboardPage" class="page active">
   <div class="summary">
-   <div class="panel"><div class="eyebrow">Spent this month</div><div class="big-total" id="monthTotal">₹0</div><div class="small-note" id="monthCount">0 expenses recorded</div></div>
-   <div class="panel"><div class="eyebrow">Daily average</div><div class="mini-total" id="dailyAverage">₹0</div><div class="small-note">For selected month</div></div>
+   <button class="panel summary-tile" type="button"
+  onclick="showPage('history')">
+  <div class="eyebrow">Spent this month</div>
+  <div class="big-total" id="monthTotal">₹0</div>
+  <div class="small-note" id="monthCount">0 expenses recorded</div>
+  <span class="tile-hint">View expenses ↗</span>
+</button>
+
+<button class="panel summary-tile" type="button"
+  onclick="showPage('reports')">
+  <div class="eyebrow">Daily average</div>
+  <div class="mini-total" id="dailyAverage">₹0</div>
+  <div class="small-note">For selected month</div>
+  <span class="tile-hint">View report ↗</span>
+</button>
   </div>
   <div class="section-head"><h2>Where it goes</h2><button class="link-btn" onclick="showPage('reports')">Full report ↗</button></div>
   <div id="categorySummary" class="category-grid"></div>
