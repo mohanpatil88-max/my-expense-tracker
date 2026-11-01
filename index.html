@@ -529,7 +529,51 @@ canvas {
   color: var(--green);
   font-size: 11px;
   font-weight: 750;
-}done
+}
+
+/* Compact top banner with comfortable side spacing */
+.hero {
+  padding: calc(12px + env(safe-area-inset-top)) 24px 16px !important;
+  margin-bottom: 14px;
+  border-radius: 0 0 20px 20px;
+}
+
+.hero h1 {
+  font-size: clamp(23px, 6vw, 28px);
+  line-height: 1.12;
+  margin: 8px 0 4px;
+}
+
+.hero p {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.month-row {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.month-row input {
+  padding: 7px 9px;
+}
+
+.topline {
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand {
+  font-size: 11px;
+  letter-spacing: .09em;
+}
+
+@media (max-width: 380px) {
+  .hero {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
