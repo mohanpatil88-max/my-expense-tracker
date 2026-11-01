@@ -528,12 +528,14 @@ canvas {
     </div>
   </div>
 
-  <p class="settings-note">
-    Connect once with your private sync code. Your data stays saved
-    on this device and will be synchronized with your cloud database
-    when automatic sync is enabled.
-  </p>
+ <p class="settings-note">
+  Your private sync code is saved securely in this browser environment
+  after verification. You only need to enter it once on this device.
+  Your expenses will sync automatically whenever an internet connection
+  is available.
+</p>
 
+<div id="cloudCodeEntry">
   <div class="field">
     <label for="cloudSyncCode">PRIVATE SYNC CODE</label>
     <input
@@ -697,6 +699,14 @@ function setDriveLastSync(message){
 function setCloudStatus(message){
   const el=document.getElementById('cloudStatus');
   if(el)el.textContent=message;
+
+  const entry=document.getElementById('cloudCodeEntry');
+  if(entry){
+    const saved=!!localStorage.getItem(CLOUD_CODE_KEY);
+    const needsReverify=/invalid|verify it again/i.test(message);
+
+    entry.classList.toggle('hidden',saved&&!needsReverify);
+  }
 }
 
 // ==========================================
@@ -958,7 +968,13 @@ await syncSupabase();
 const savedCloudCode=localStorage.getItem(CLOUD_CODE_KEY);
 
 if(savedCloudCode){
-  setCloudStatus('Previously verified on this device. Automatic sync setup pending.');
+  setCloudStatus(
+    'Connected on this device · Automatic cloud sync is enabled.'
+  );
+}else{
+  setCloudStatus(
+    'Not connected yet · Enter your private sync code once to get started.'
+  );
 }
 
 function connectGoogleDrive(){
