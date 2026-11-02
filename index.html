@@ -531,6 +531,255 @@ canvas {
   font-weight: 750;
 }
 
+   
+/* =========================================
+   MOBILE RESPONSIVE FIX — SAFE CSS PATCH
+   Preserves existing application functionality
+   ========================================= */
+
+/* Prevent elements from expanding beyond the screen */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.app,
+.page,
+.hero,
+.panel,
+.card,
+.category-grid,
+.summary,
+.form-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Give the header proper spacing and allow wrapping */
+.hero {
+  width: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.topline {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.brand {
+  flex: 1 1 145px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.topline > div:last-child {
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.hero h1 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.month-row {
+  flex-wrap: wrap;
+}
+
+.month-row input {
+  max-width: 100%;
+}
+
+/* Dashboard summary cards */
+.summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.summary > * {
+  min-width: 0;
+}
+
+/* Category cards */
+.category-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cat-card,
+.category-tile {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cat-top {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.cat-name,
+.cat-amount,
+.exp-title {
+  overflow-wrap: anywhere;
+}
+
+/* Section headings and action buttons */
+.section-head {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.section-head h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Forms */
+.form-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field,
+.field input,
+.field select,
+.field textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Reports */
+.report-row {
+  min-width: 0;
+}
+
+.report-row .cat-name {
+  width: min(108px, 30%);
+  flex-shrink: 0;
+}
+
+.report-track {
+  min-width: 0;
+}
+
+/* Expense rows */
+.expense {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.exp-main {
+  min-width: 0;
+}
+
+/* Navigation and floating button */
+.bottom-nav {
+  width: 100%;
+  max-width: 100%;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+.nav-inner {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.nav-btn {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fab {
+  right: max(16px, calc((100vw - 720px) / 2));
+}
+
+/* Narrow iPhone screens */
+@media (max-width: 420px) {
+  .app {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .hero {
+    margin-left: -14px;
+    margin-right: -14px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .summary {
+    gap: 8px;
+  }
+
+  .summary .panel {
+    padding: 13px 10px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: .055em;
+  }
+
+  .summary-tile .big-total {
+    font-size: clamp(19px, 5vw, 25px);
+  }
+
+  .summary-tile .mini-total {
+    font-size: clamp(18px, 4.8vw, 23px);
+  }
+
+  .category-grid {
+    gap: 8px;
+  }
+
+  .cat-card {
+    padding: 12px 10px;
+  }
+
+  .cat-top {
+    gap: 7px;
+  }
+
+  .cat-name {
+    font-size: 12px;
+  }
+
+  .section-head {
+    gap: 6px;
+  }
+
+  .section-head h2 {
+    font-size: 17px;
+  }
+
+  .form-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+/* Extra narrow screens */
+@media (max-width: 350px) {
+  .summary,
+  .category-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .topline {
+    align-items: flex-start;
+  }
+}
+
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
