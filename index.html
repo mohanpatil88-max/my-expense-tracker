@@ -780,6 +780,185 @@ body {
 }
 
 
+/* ==========================================
+   FINAL MOBILE LAYOUT OVERRIDE
+   Version 2 — responsive width correction
+   ========================================== */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow-x: clip;
+}
+
+.app {
+  width: 100%;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* CRITICAL FIX:
+   Header is outside .app, so remove negative margins */
+.hero {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: max(18px, calc((100% - 720px) / 2));
+  padding-right: max(18px, calc((100% - 720px) / 2));
+}
+
+.hero *,
+.app * {
+  min-width: 0;
+}
+
+/* Header controls */
+.topline {
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.brand {
+  flex: 1 1 140px;
+  overflow-wrap: anywhere;
+}
+
+.month-row {
+  flex-wrap: wrap;
+}
+
+.month-row input {
+  width: auto;
+  max-width: 100%;
+}
+
+/* Summary tiles */
+.summary {
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary > * {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Category cards: one column on mobile */
+.category-grid {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 11px;
+}
+
+.cat-card,
+.category-tile {
+  width: 100%;
+  max-width: 100%;
+}
+
+.cat-top {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.cat-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Section headings */
+.section-head {
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* Reports and forms */
+.report-row {
+  width: 100%;
+  min-width: 0;
+}
+
+.report-row .cat-name {
+  width: min(108px, 30%);
+}
+
+.report-track {
+  min-width: 0;
+}
+
+.form-row {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.nav-inner {
+  width: 100%;
+  max-width: 600px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.nav-btn {
+  min-width: 0;
+  padding-left: 1px;
+  padding-right: 1px;
+}
+
+/* Floating add button */
+.fab {
+  right: 16px;
+}
+
+/* Small-screen refinement */
+@media (max-width: 420px) {
+  .app {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .hero {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .summary {
+    gap: 8px;
+  }
+
+  .summary .panel {
+    padding: 13px 10px;
+  }
+
+  .summary-tile .big-total {
+    font-size: clamp(19px, 5vw, 25px);
+  }
+
+  .summary-tile .mini-total {
+    font-size: clamp(18px, 4.8vw, 23px);
+  }
+
+  .cat-card {
+    padding: 14px;
+  }
+}
+
 </style>
 
 <link rel="manifest" href="./manifest.webmanifest">
