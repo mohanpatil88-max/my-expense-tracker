@@ -2691,95 +2691,262 @@ $('quickQueueFiles').addEventListener('change', async e => {
     e.target.value = '';
   }
 });
-      $('importFile').addEventListener('change',async e=>{
-  const file=e.target.files?.[0];
-  if(!file)return;
+$('importFile').addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  try{
-    const parsed=JSON.parse(await file.text());
-
-    if(!parsed||!Array.isArray(parsed.categories)||!Array.isArray(parsed.expenses)){
-      throw new Error('This file is not a valid expense tracker backup.');
+  try {
+    if (dataReadOnly) {
+      throw new Error('Restore paused to protect your saved data.');
     }
 
-    if(!confirm('Restore backup? This replaces the records currently in this app. Export a backup of current data first if you want to keep it.'))return;
+    const parsed = JSON.parse(await file.text());
 
-    const categories=parsed.categories
-      .filter(c=>
-        c&&typeof c.id==='string'&&c.id.trim()&&
-        typeof c.name==='string'&&c.name.trim()
-      )
-      .map(c=>({
-        id:c.id,
-        name:c.name.trim(),
-        emoji:String(c.emoji||'📌').slice(0,12),
-        createdAt:Number(c.createdAt)||Date.now(),
-        updatedAt:Number(c.updatedAt)||Number(c.createdAt)||Date.now()
-      }));
-
-    const expenses=parsed.expenses
-      .filter(x=>{
-        if(!x||typeof x.id!=='string'||!x.id.trim())return false;
-
-        const amount=Number(x.amount);
-        const date=x.date;
-        const parsedDate=new Date(String(date)+'T12:00:00');
-
-        return Number.isFinite(amount)&&amount>0&&amount<=999999999&&
-          typeof date==='string'&&
-          /^\d{4}-\d{2}-\d{2}$/.test(date)&&
-          !isNaN(parsedDate.getTime())&&
-          parsedDate.toISOString().slice(0,10)===date;
-      })
-      .map(x=>({
-        id:x.id,
-        amount:Number(x.amount),
-        date:x.date,
-        categoryId:String(x.categoryId||'uncategorized'),
-        note:String(x.note||'').slice(0,250),
-        createdAt:Number(x.createdAt)||Date.now(),
-        updatedAt:Number(x.updatedAt)||Number(x.createdAt)||Date.now()
-      }));
-
-    if(!categories.length){
-      throw new Error('Backup contains no valid categories.');
+    // Accept current backups and older backups without app/version fields.
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !Array.isArray(parsed.categories) ||
+      !Array.isArray(parsed.expenses)
+    ) {
+      throw new Error('This is not a valid expense tracker backup.');
     }
 
-    const importedExpenseIds=new Set(expenses.map(x=>x.id));
-    const importedCategoryIds=new Set(categories.map(x=>x.id));
+    if (
+      (parsed.app && parsed.app !== 'My Expense Tracker') ||
+      (parsed.version !== undefined && parsed.version !== 1)
+    ) {
+      throw new Error('This backup belongs to an unsupported app or version.');
+    }
 
-    const deletedExpenseIds=[...new Set([
-      ...(Array.isArray(parsed.deletedExpenseIds)?parsed.deletedExpenseIds:[]),
-      ...(state.deletedExpenseIds||[]),
-      ...state.expenses.filter(x=>!importedExpenseIds.has(x.id)).map(x=>x.id)
-    ])].filter(id=>typeof id==='string'&&!importedExpenseIds.has(id));
+    if (!parsed.categories.length) {
+      throw new Error('The backup contains no categories.');
+    }
 
-    const deletedCategoryIds=[...new Set([
-      ...(Array.isArray(parsed.deletedCategoryIds)?parsed.deletedCategoryIds:[]),
-      ...(state.deletedCategoryIds||[]),
-      ...state.categories.filter(x=>!importedCategoryIds.has(x.id)).map(x=>x.id)
-    ])].filter(id=>typeof id==='string'&&!importedCategoryIds.has(id));
+    const categoryIds = new Set();
+    const categories = [];
 
-    const success=commitState(()=>{
-      state={
-        version:1,
+    // Validate every category. Do not silently discard invalid records.
+    for (const c of parsed.categories) {
+      if (
+        !c ||
+        typeof c.id !== 'string' ||
+        !c.id.trim() ||
+        typeof c.name !== 'string' ||
+        !c.name.trim()
+      ) {
+        throw new Error('A category has a missing or invalid ID or name.');
+      }
+
+      const id = c.id.trim();
+
+      if (categoryIds.has(id)) {
+        throw new Error('Duplicate category ID found: ' + id);
+      }
+
+      categoryIds.add(id);
+
+      categories.push({
+        id,
+        name: c.name.trim(),
+        emoji: String(c.emoji || '📌').slice(0, 12),
+        createdAt: Number(c.createdAt) || Date.now(),
+        updatedAt:
+          Number(c.updatedAt) ||
+          Number(c.createdAt) ||
+          Date.now()
+      });
+    }
+
+    const expenseIds = new Set();
+    const expenses = [];
+
+    // Validate every expense before changing the app's current data.
+    for (const x of parsed.expenses) {
+      if (
+        !x ||
+        typeof x.id !== 'string' ||
+        !x.id.trim()
+      ) {
+        throw new Error('An expense has a missing or invalid ID.');
+      }
+
+      const id = x.id.trim();
+
+      if (expenseIds.has(id)) {
+        throw new Error('Duplicate expense ID found: ' + id);
+      }
+
+      expenseIds.add(id);
+
+      const amount = Number(x.amount);
+      const date = x.date;
+      const parsedDate =
+        typeof date === 'string'
+          ? new Date(date + 'T12:00:00')
+          : new Date(NaN);
+
+      if (
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        amount > 999999999
+      ) {
+        throw new Error('An expense has an invalid amount. Check expense: ' + id);
+      }
+
+      if (
+        typeof date !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+        isNaN(parsedDate.getTime()) ||
+        parsedDate.toISOString().slice(0, 10) !== date
+      ) {
+        throw new Error('An expense has an invalid date. Check expense: ' + id);
+      }
+
+      const categoryId = String(x.categoryId || 'uncategorized');
+
+      if (
+        categoryId !== 'uncategorized' &&
+        !categoryIds.has(categoryId)
+      ) {
+        throw new Error(
+          'An expense refers to a category that is missing from the backup. Expense ID: ' + id
+        );
+      }
+
+      if (x.note !== undefined && typeof x.note !== 'string') {
+        throw new Error('An expense contains an invalid note. Expense ID: ' + id);
+      }
+
+      expenses.push({
+        id,
+        amount,
+        date,
+        categoryId,
+        note: String(x.note || '').slice(0, 250),
+        createdAt: Number(x.createdAt) || Date.now(),
+        updatedAt:
+          Number(x.updatedAt) ||
+          Number(x.createdAt) ||
+          Date.now()
+      });
+    }
+
+    // Validate deletion history if it exists in the backup.
+    const validateDeletedIds = (value, label) => {
+      if (value === undefined) return [];
+
+      if (!Array.isArray(value)) {
+        throw new Error('The backup has invalid ' + label + ' history.');
+      }
+
+      if (
+        value.some(id => typeof id !== 'string' || !id.trim())
+      ) {
+        throw new Error('The backup has invalid IDs in ' + label + ' history.');
+      }
+
+      return [...new Set(value.map(id => id.trim()))];
+    };
+
+    const backupDeletedExpenseIds = validateDeletedIds(
+      parsed.deletedExpenseIds,
+      'expense deletion'
+    );
+
+    const backupDeletedCategoryIds = validateDeletedIds(
+      parsed.deletedCategoryIds,
+      'category deletion'
+    );
+
+    const totalAmount = expenses.reduce(
+      (sum, expense) => sum + expense.amount,
+      0
+    );
+
+    const formattedTotal = new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 2
+    }).format(totalAmount);
+
+    const exportedAt = parsed.exportedAt
+      ? new Date(parsed.exportedAt)
+      : null;
+
+    const backupDate =
+      exportedAt && !isNaN(exportedAt.getTime())
+        ? exportedAt.toLocaleString('en-IN')
+        : 'Not recorded';
+
+    // Preview and ask permission only after all validation succeeds.
+    const preview =
+      'BACKUP PREVIEW\n\n' +
+      'Backup date: ' + backupDate + '\n' +
+      'Categories: ' + categories.length + '\n' +
+      'Expenses: ' + expenses.length + '\n' +
+      'Total expenses: ' + formattedTotal + '\n\n' +
+      'IMPORTANT: Restoring will replace the records currently in this app.\n' +
+      'Your current records will not be merged with this backup.\n\n' +
+      'Continue with restore?';
+
+    if (!confirm(preview)) {
+      toast('Restore cancelled. Your data was not changed.');
+      return;
+    }
+
+    const importedExpenseIds = new Set(expenses.map(x => x.id));
+    const importedCategoryIds = new Set(categories.map(x => x.id));
+
+    // Preserve deletion history so cloud sync does not resurrect
+    // records that were deleted before this restore.
+    const deletedExpenseIds = [...new Set([
+      ...backupDeletedExpenseIds,
+      ...(state.deletedExpenseIds || []),
+      ...state.expenses
+        .filter(x => !importedExpenseIds.has(x.id))
+        .map(x => x.id)
+    ])].filter(
+      id => typeof id === 'string' && !importedExpenseIds.has(id)
+    );
+
+    const deletedCategoryIds = [...new Set([
+      ...backupDeletedCategoryIds,
+      ...(state.deletedCategoryIds || []),
+      ...state.categories
+        .filter(x => !importedCategoryIds.has(x.id))
+        .map(x => x.id)
+    ])].filter(
+      id => typeof id === 'string' && !importedCategoryIds.has(id)
+    );
+
+    const success = commitState(() => {
+      state = {
+        version: 1,
         categories,
         expenses,
         deletedExpenseIds,
         deletedCategoryIds
       };
-    },'Backup restored successfully');
+    }, 'Backup restored successfully');
 
-    if(success){
-      announce('Your backup has been restored.','success');
+    if (success) {
+      announce(
+        'Backup restored successfully. ' +
+        expenses.length +
+        ' expenses and ' +
+        categories.length +
+        ' categories restored.',
+        'success'
+      );
     }
 
-  }catch(err){
-    console.error('Backup restore failed:',err);
-    toast(err.message||'Could not restore this backup');
-    announce(err.message||'Backup restore failed.','error');
-  }finally{
-    e.target.value='';
+  } catch (err) {
+    console.error('Backup restore failed:', err);
+    toast(err.message || 'Could not restore this backup');
+    announce(err.message || 'Backup restore failed.', 'error');
+  } finally {
+    e.target.value = '';
   }
 });
 window.clearAllData=function(){
