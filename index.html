@@ -861,7 +861,7 @@ display: none;
 
 .nav-inner {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: stretch;
   gap: 3px;
   width: 100%;
@@ -1126,6 +1126,50 @@ button.category-tile:active {
   <div class="panel" style="padding:18px"><div class="eyebrow">Total spending</div><div class="big-total" id="reportTotal">₹0</div><div class="small-note" id="reportCaption"></div><div id="reportBars"></div></div>
   <div class="section-head"><h2>Spending by category</h2></div><div id="reportCategories" class="list"></div>
  </section>
+   <section id="insightsPage" class="page">
+  <div class="section-head">
+    <h2>Financial insights</h2>
+    <span class="pill" id="insightsMonth"></span>
+  </div>
+
+  <div class="summary">
+    <div class="panel summary-tile">
+      <div class="eyebrow">Compared with previous month</div>
+      <div class="mini-total" id="insightChange">—</div>
+      <div class="small-note" id="insightChangeNote">Not enough data yet</div>
+    </div>
+    <div class="panel summary-tile">
+      <div class="eyebrow">Daily average</div>
+      <div class="mini-total" id="insightDailyAverage">₹0</div>
+      <div class="small-note">Selected month</div>
+    </div>
+  </div>
+
+  <div class="panel" style="padding:18px;margin-bottom:14px">
+    <div class="section-head"><h2>Monthly spending trend</h2></div>
+    <div id="insightMonthlyTrend"></div>
+  </div>
+
+  <div class="panel" style="padding:18px;margin-bottom:14px">
+    <div class="section-head"><h2>Weekly spending</h2></div>
+    <div id="insightWeeklyTrend"></div>
+  </div>
+
+  <div class="panel" style="padding:18px;margin-bottom:14px">
+    <div class="section-head"><h2>Top categories</h2></div>
+    <div id="insightTopCategories" class="list"></div>
+  </div>
+
+  <div class="panel" style="padding:18px;margin-bottom:14px">
+    <div class="section-head"><h2>Largest expenses</h2></div>
+    <div id="insightLargestExpenses" class="list"></div>
+  </div>
+
+  <div class="panel" style="padding:18px;margin-bottom:14px">
+    <div class="section-head"><h2>Spending observations</h2></div>
+    <div id="insightObservations" class="list"></div>
+  </div>
+</section>
  <section id="categoriesPage" class="page">
   <div class="section-head"><h2>Manage categories</h2><button class="primary" onclick="openCategory()">＋ Add</button></div>
   <p class="settings-note">Make categories that match your life. Rename or remove categories whenever you need. Expenses in a removed category are kept under “Uncategorized” rather than deleted.</p>
@@ -1231,6 +1275,9 @@ button.category-tile:active {
   <button class="nav-btn" data-page="reports" onclick="showPage('reports')">
    <span>▥</span>Reports
   </button>
+   <button class="nav-btn" data-page="insights" onclick="showPage('insights')">
+  <span>✦</span>Insights
+</button>
   <button class="nav-btn" data-page="categories" onclick="showPage('categories')">
    <span>◈</span>Categories
   </button>
@@ -2338,8 +2385,197 @@ window.openCategoryExpenses=function(categoryId){
   showPage('history');
 };
 function renderReports(){const items=allForMonth(),cats=categoryTotals(items),sum=total(items);$('reportMonth').textContent=new Date(selectedMonth()+'-15T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});$('reportTotal').textContent=money(sum);$('reportCaption').textContent=items.length+' expenses · '+(sum? 'Largest category: '+(cats[0]?.cat.name||'—'):'No spending recorded this month');const max=cats[0]?.amount||1;$('reportBars').innerHTML=cats.map(x=>`<div class="report-row"><div class="cat-name">${esc(x.cat.emoji||'📌')} ${esc(x.cat.name)}</div><div class="report-track"><span style="width:${x.amount/max*100}%"></span></div><div class="report-value">${money(x.amount)}</div></div>`).join('')||'<p class="settings-note">Add expenses to see your category breakdown.</p>';$('reportCategories').innerHTML=cats.map(x=>`<div class="expense"><div class="cat-icon">${esc(x.cat.emoji||'📌')}</div><div class="exp-main"><div class="exp-title">${esc(x.cat.name)}</div><div class="exp-sub">${sum?Math.round(x.amount/sum*100):0}% of monthly spending</div></div><div class="exp-amount">${money(x.amount)}</div></div>`).join('')||empty('No report yet','Your spending summary will appear here.')}
+function renderInsights(){
+  const month = selectedMonth();
+  const [year, monthNumber] = month.split('-').map(Number);
+  const items = allForMonth();
+  const sum = total(items);
+  const daysInMonth = new Date(year, monthNumber, 0).getDate();
+
+  const previousDate = new Date(year, monthNumber - 2, 1);
+  const previousMonth =
+    previousDate.getFullYear() + '-' +
+    String(previousDate.getMonth() + 1).padStart(2, '0');
+
+  const previousItems = state.expenses.filter(e =>
+    String(e.date || '').slice(0, 7) === previousMonth
+  );
+  const previousTotal = total(previousItems);
+
+  $('insightsMonth').textContent =
+    new Date(year, monthNumber - 1, 15).toLocaleDateString(
+      'en-IN', {month:'long', year:'numeric'}
+    );
+
+  $('insightDailyAverage').textContent =
+    money(daysInMonth ? sum / daysInMonth : 0);
+
+  if (previousItems.length) {
+    const difference = sum - previousTotal;
+    const percentage = previousTotal
+      ? Math.round(Math.abs(difference) / previousTotal * 100)
+      : null;
+
+    $('insightChange').textContent =
+      difference > 0 ? '↑ ' + (percentage ?? '—') + '%' :
+      difference < 0 ? '↓ ' + (percentage ?? '—') + '%' :
+      'No change';
+
+    $('insightChangeNote').textContent =
+      difference > 0 ? 'More spending than previous month' :
+      difference < 0 ? 'Less spending than previous month' :
+      'Same spending as previous month';
+  } else {
+    $('insightChange').textContent = '—';
+    $('insightChangeNote').textContent =
+      'No previous-month records to compare';
+  }
+
+  // Monthly trend: selected month and previous five months.
+  const monthly = [];
+  for (let offset = 5; offset >= 0; offset--) {
+    const d = new Date(year, monthNumber - 1 - offset, 1);
+    const key = d.getFullYear() + '-' +
+      String(d.getMonth() + 1).padStart(2, '0');
+
+    const monthItems = state.expenses.filter(e =>
+      String(e.date || '').slice(0, 7) === key
+    );
+
+    monthly.push({
+      label: d.toLocaleDateString('en-IN', {month:'short'}),
+      amount: total(monthItems)
+    });
+  }
+
+  const monthlyMax = Math.max(1, ...monthly.map(x => x.amount));
+
+  $('insightMonthlyTrend').innerHTML = monthly.map(x => `
+    <div class="report-row">
+      <div class="cat-name">${esc(x.label)}</div>
+      <div class="report-track">
+        <span style="width:${x.amount / monthlyMax * 100}%"></span>
+      </div>
+      <div class="report-value">${money(x.amount)}</div>
+    </div>
+  `).join('');
+
+  // Weekly trend: calendar weeks within the selected month.
+  const weeks = [0, 0, 0, 0, 0];
+  items.forEach(e => {
+    const day = Number(String(e.date || '').slice(8, 10));
+    if (day >= 1 && day <= daysInMonth) {
+      const weekIndex = Math.min(4, Math.floor((day - 1) / 7));
+      weeks[weekIndex] += Number(e.amount || 0);
+    }
+  });
+
+  const weekMax = Math.max(1, ...weeks);
+
+  $('insightWeeklyTrend').innerHTML = weeks.map((amount, index) => `
+    <div class="report-row">
+      <div class="cat-name">Week ${index + 1}</div>
+      <div class="report-track">
+        <span style="width:${amount / weekMax * 100}%"></span>
+      </div>
+      <div class="report-value">${money(amount)}</div>
+    </div>
+  `).join('');
+
+  // Top categories.
+  const cats = categoryTotals(items);
+
+  $('insightTopCategories').innerHTML = cats.length
+    ? cats.slice(0, 5).map(x => `
+      <div class="expense">
+        <div class="cat-icon">${esc(x.cat.emoji || '📌')}</div>
+        <div class="exp-main">
+          <div class="exp-title">${esc(x.cat.name)}</div>
+          <div class="exp-sub">
+            ${sum ? Math.round(x.amount / sum * 100) : 0}% of monthly spending
+          </div>
+        </div>
+        <div class="exp-amount">${money(x.amount)}</div>
+      </div>
+    `).join('')
+    : empty('No category data yet', 'Add expenses to see your top categories.');
+
+  // Largest expenses.
+  const largest = [...items]
+    .sort((a, b) => Number(b.amount) - Number(a.amount))
+    .slice(0, 5);
+
+  $('insightLargestExpenses').innerHTML = largest.length
+    ? largest.map(e => `
+      <div class="expense">
+        <div class="cat-icon">${esc(category(e.categoryId).emoji || '📌')}</div>
+        <div class="exp-main">
+          <div class="exp-title">${esc(category(e.categoryId).name)}</div>
+          <div class="exp-sub">
+            ${esc(dateLabel(e.date))}${e.note ? ' · ' + esc(e.note) : ''}
+          </div>
+        </div>
+        <div class="exp-amount">${money(e.amount)}</div>
+      </div>
+    `).join('')
+    : empty('No expenses yet', 'Your largest expenses will appear here.');
+
+  // Observations.
+  const observations = [];
+
+  if (items.length) {
+    if (cats.length) {
+      observations.push(
+        'Your highest spending category is ' +
+        cats[0].cat.name + ' at ' + money(cats[0].amount) + '.'
+      );
+    }
+
+    const largestDay = {};
+    items.forEach(e => {
+      const key = e.date;
+      largestDay[key] = (largestDay[key] || 0) + Number(e.amount || 0);
+    });
+
+    const bestDay = Object.entries(largestDay)
+      .sort((a, b) => b[1] - a[1])[0];
+
+    if (bestDay) {
+      observations.push(
+        'Your highest-spending day was ' +
+        dateLabel(bestDay[0]) + ' (' + money(bestDay[1]) + ').'
+      );
+    }
+
+    if (previousItems.length) {
+      observations.push(
+        sum > previousTotal
+          ? 'Your spending is higher than the previous month.'
+          : sum < previousTotal
+            ? 'Your spending is lower than the previous month.'
+            : 'Your spending matches the previous month.'
+      );
+    }
+  }
+
+  $('insightObservations').innerHTML = observations.length
+    ? observations.map(message =>
+        `<div class="expense"><div class="exp-main">${esc(message)}</div></div>`
+      ).join('')
+    : empty(
+        'Insights will appear here',
+        'Add expenses to generate useful observations.'
+      );
+}
 function renderCategories(){$('categoryManager').innerHTML=state.categories.map(c=>`<div class="category-manage"><div class="cat-icon">${esc(c.emoji||'📌')}</div><div class="cat-name">${esc(c.name)}</div><button class="tiny" onclick="editCategory('${esc(c.id)}')">Rename</button><button class="danger" onclick="deleteCategory('${esc(c.id)}')">Remove</button></div>`).join('')||empty('No categories','Add a category to start tracking.')}
-function render(){fillCategorySelects();renderDashboard();renderHistory();renderReports();renderCategories()}
+function render(){
+  fillCategorySelects();
+  renderDashboard();
+  renderHistory();
+  renderReports();
+  renderInsights();
+  renderCategories();
+}
 window.showPage=function(name){
   const page=document.getElementById(name+'Page');
 
