@@ -453,13 +453,16 @@ textarea:focus-visible {
   border-radius: 20px;
 }
 
-.bar > *,
-.report-track > * {
-  display: block;
-  height: 100%;
+.bar > span,
+.report-track > span {
+  display: block !important;
+  width: 0;
+  height: 7px !important;
   min-width: 3px;
-  background: var(--primary);
-  border-radius: inherit;
+  background-color: #167653 !important;
+  border-radius: 20px;
+  opacity: 1 !important;
+  visibility: visible !important;
   transition: width .35s ease;
 }
 
